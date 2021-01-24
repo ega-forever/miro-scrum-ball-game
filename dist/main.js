@@ -92,15 +92,6 @@
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
-// CONCATENATED MODULE: ./src/static/bucketType.ts
-var BucketType;
-(function (BucketType) {
-    BucketType["source"] = "source";
-    BucketType["target"] = "target";
-    BucketType["draw"] = "draw";
-})(BucketType || (BucketType = {}));
-/* harmony default export */ var static_bucketType = (BucketType);
-
 // CONCATENATED MODULE: ./src/config/index.ts
 /* harmony default export */ var config = ({
     appId: '3074457352753106105',
@@ -139,7 +130,20 @@ var FormType;
     sticker: '#f16c7f'
 });
 
+// CONCATENATED MODULE: ./src/static/bucketType.ts
+var BucketType;
+(function (BucketType) {
+    BucketType["source"] = "source";
+    BucketType["target"] = "target";
+    BucketType["draw"] = "draw";
+})(BucketType || (BucketType = {}));
+/* harmony default export */ var static_bucketType = (BucketType);
+
 // CONCATENATED MODULE: ./src/models/UserModel.ts
+
+
+
+
 
 
 
@@ -176,9 +180,177 @@ class UserModel_UserModel {
     static getAllCreatedUsers(widgets) {
         return widgets.filter(w => w.metadata[config.appId] && w.metadata[config.appId].formType === formType.userSticker);
     }
+    static async trackChanges(userId) {
+        while (UserModel_UserModel.isGameRunning) { //todo check if user widget exists
+            const widgets = await miro.board.widgets.get();
+            const userWidget = UserModel_UserModel.get(userId, widgets);
+            if (!userWidget) {
+                UserModel_UserModel.isGameRunning = false;
+                return;
+            }
+            for (const widget of widgets) {
+                if (widget.metadata && widget.metadata[config.appId] && widget.metadata[config.appId].formType === formType.ball && widget.metadata[config.appId].owner === userId) {
+                    await BallModel_BallModel.checkBallProportions(widget);
+                    await this.checkBallPosition(userId, widget, widgets);
+                }
+            }
+            await new Promise(res => setTimeout(res, 500));
+        }
+    }
+    static async checkBallPosition(userId, ball, widgets) {
+        const ballMeta = BallModel_BallModel.getMeta(ball);
+        const currentUserCard = UserModel_UserModel.get(userId, widgets);
+        const userCardWithBall = BallModel_BallModel.userCardWithBall(ball, widgets);
+        const allUserBallsCount = BallModel_BallModel.getUserBallsAmount(userCardWithBall, widgets);
+        const drawBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.draw, widgets);
+        if (userCardWithBall &&
+            currentUserCard.metadata[config.appId].owner === userCardWithBall.metadata[config.appId].owner &&
+            allUserBallsCount > config.rules.memberBallLimit) {
+            ballMeta.bucketType = static_bucketType.draw;
+            ballMeta.owner = drawBucketMeta.owner;
+            BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
+            BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
+            return;
+        }
+        if (userCardWithBall && currentUserCard.metadata[config.appId].owner !== userCardWithBall.metadata[config.appId].owner) {
+            if (ballMeta.participatedUserIds.indexOf(userCardWithBall.metadata[config.appId].owner) === -1) {
+                ballMeta.participatedUserIds.push(userCardWithBall.metadata[config.appId].owner);
+            }
+            ballMeta.owner = userCardWithBall.metadata[config.appId].owner;
+            ballMeta.bucketType = null;
+            BallModel_BallModel.updateMeta(ball, ballMeta);
+        }
+        const sourceBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.source, widgets);
+        const isInTargetBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.target, ball, widgets);
+        if (isInTargetBucket) {
+            ballMeta.bucketType = static_bucketType.target;
+            ballMeta.owner = sourceBucketMeta.owner;
+            BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
+            BucketModel_BucketModel.updateBallsCount(static_bucketType.target, widgets);
+            return;
+        }
+        if (!userCardWithBall && !isInTargetBucket) {
+            console.log('outside of all valid cards');
+            ballMeta.bucketType = static_bucketType.draw;
+            ballMeta.owner = drawBucketMeta.owner;
+            BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
+            BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
+            return;
+        }
+    }
     static async remove(userId, widgets) {
         const widget = UserModel_UserModel.get(userId, widgets);
         await miro.board.widgets.deleteById(widget.id);
+    }
+}
+UserModel_UserModel.isGameRunning = true;
+
+// CONCATENATED MODULE: ./src/models/BallModel.ts
+
+
+
+
+
+class BallModel_BallModel {
+    static async get(ballId) {
+        const widgets = await miro.board.widgets.get();
+        return widgets.find(w => w.id === ballId) || null;
+    }
+    static getMeta(widget) {
+        return widget ? widget.metadata[config.appId] : null;
+    }
+    static async create(x, y, owner, index, color, bucketType) {
+        await miro.board.widgets.create({
+            type: 'shape',
+            style: {
+                backgroundColor: color,
+                shapeType: 4
+            },
+            height: 50,
+            width: 50,
+            x,
+            y,
+            metadata: {
+                [config.appId]: {
+                    ballIndex: index,
+                    owner,
+                    participatedUserIds: [],
+                    bucketType,
+                    formType: formType.ball
+                }
+            }
+        });
+    }
+    static userCardWithBall(ball, widgets) {
+        const usersCards = UserModel_UserModel.getAllCreatedUsers(widgets);
+        return usersCards.find(s => {
+            return (ball.x - ball.width / 2) >= (s.bounds.x - s.bounds.width / 2) && (ball.x + ball.width / 2) <= (s.bounds.x + s.bounds.width / 2) &&
+                (ball.y - ball.height / 2) >= (s.bounds.y - s.bounds.height / 2) && (ball.y + ball.height / 2) <= (s.bounds.y + s.bounds.height / 2);
+        });
+    }
+    static getUserBallsAmount(userStickerWidget, widgets) {
+        if (!userStickerWidget) {
+            return 1;
+        }
+        const userBallsAmount = widgets.filter((w) => w.metadata[config.appId] &&
+            w.metadata[config.appId].formType === formType.ball &&
+            (w.x - w.width / 2) >= (userStickerWidget.bounds.x - userStickerWidget.bounds.width / 2) && (w.x + w.width / 2) <= (userStickerWidget.bounds.x + userStickerWidget.bounds.width / 2) &&
+            (w.y - w.height / 2) >= (userStickerWidget.bounds.y - userStickerWidget.bounds.height / 2) && (w.y + w.height / 2) <= (userStickerWidget.bounds.y + userStickerWidget.bounds.height / 2)).length;
+        return userBallsAmount ? userBallsAmount : 1;
+    }
+    static getBucketBallsAmount(bucketType, widgets) {
+        const balls = BallModel_BallModel.getBucketBalls(bucketType, widgets);
+        return balls.length;
+    }
+    static getBucketBalls(bucketType, widgets) {
+        return widgets.filter(w => w.metadata[config.appId] &&
+            w.metadata[config.appId].formType === formType.ball &&
+            w.metadata[config.appId].bucketType === bucketType);
+    }
+    static async updateMeta(ball, ballMeta) {
+        Object.assign(ball, {
+            metadata: {
+                [config.appId]: ballMeta
+            }
+        });
+        await miro.board.widgets.update({
+            id: ball.id,
+            metadata: {
+                [config.appId]: ballMeta
+            },
+            text: ballMeta.participatedUserIds.length.toString()
+        });
+    }
+    static async moveToBucket(ball, meta, widgets) {
+        const bucket = BucketModel_BucketModel.get(meta.bucketType, widgets);
+        const update = {
+            id: ball.id,
+            x: bucket.x,
+            y: bucket.y,
+            text: '-',
+            metadata: {
+                [config.appId]: meta
+            }
+        };
+        Object.assign(ball, update);
+        await miro.board.widgets.update(update);
+    }
+    static async resetProportions(ball) {
+        Object.assign(ball, {
+            bounds: {
+                ...ball.bounds,
+                height: config.balls.radius,
+                width: config.balls.radius
+            },
+            height: config.balls.radius,
+            width: config.balls.radius
+        });
+        await miro.board.widgets.update(ball);
+    }
+    static async checkBallProportions(ball) {
+        if (ball.bounds.height !== config.balls.radius || ball.bounds.width !== config.balls.radius) {
+            await BallModel_BallModel.resetProportions(ball);
+        }
     }
 }
 
@@ -292,111 +464,9 @@ class BucketModel_BucketModel {
     }
 }
 
-// CONCATENATED MODULE: ./src/models/BallModel.ts
-
-
-
-
-
-class BallModel_BallModel {
-    static async get(ballId) {
-        const widgets = await miro.board.widgets.get();
-        return widgets.find(w => w.id === ballId) || null;
-    }
-    static getMeta(widget) {
-        return widget ? widget.metadata[config.appId] : null;
-    }
-    static async create(x, y, owner, index, color, bucketType) {
-        await miro.board.widgets.create({
-            type: 'shape',
-            style: {
-                backgroundColor: color,
-                shapeType: 4
-            },
-            height: 50,
-            width: 50,
-            x,
-            y,
-            metadata: {
-                [config.appId]: {
-                    ballIndex: index,
-                    owner,
-                    participatedUserIds: [],
-                    bucketType,
-                    formType: formType.ball
-                }
-            }
-        });
-    }
-    static userCardWithBall(ball, widgets) {
-        const usersCards = UserModel_UserModel.getAllCreatedUsers(widgets);
-        return usersCards.find(s => {
-            return (ball.x - ball.width / 2) >= (s.bounds.x - s.bounds.width / 2) && (ball.x + ball.width / 2) <= (s.bounds.x + s.bounds.width / 2) &&
-                (ball.y - ball.height / 2) >= (s.bounds.y - s.bounds.height / 2) && (ball.y + ball.height / 2) <= (s.bounds.y + s.bounds.height / 2);
-        });
-    }
-    static getUserBallsAmount(userStickerWidget, widgets) {
-        if (!userStickerWidget) {
-            return 1;
-        }
-        const userBallsAmount = widgets.filter((w) => w.metadata[config.appId] &&
-            w.metadata[config.appId].formType === formType.ball &&
-            (w.x - w.width / 2) >= (userStickerWidget.bounds.x - userStickerWidget.bounds.width / 2) && (w.x + w.width / 2) <= (userStickerWidget.bounds.x + userStickerWidget.bounds.width / 2) &&
-            (w.y - w.height / 2) >= (userStickerWidget.bounds.y - userStickerWidget.bounds.height / 2) && (w.y + w.height / 2) <= (userStickerWidget.bounds.y + userStickerWidget.bounds.height / 2)).length;
-        return userBallsAmount ? userBallsAmount : 1;
-    }
-    static getBucketBallsAmount(bucketType, widgets) {
-        const balls = BallModel_BallModel.getBucketBalls(bucketType, widgets);
-        return balls.length;
-    }
-    static getBucketBalls(bucketType, widgets) {
-        return widgets.filter(w => w.metadata[config.appId] &&
-            w.metadata[config.appId].formType === formType.ball &&
-            w.metadata[config.appId].bucketType === bucketType);
-    }
-    static async updateMeta(ball, ballMeta) {
-        Object.assign(ball, {
-            metadata: {
-                [config.appId]: ballMeta
-            }
-        });
-        await miro.board.widgets.update({
-            id: ball.id,
-            metadata: {
-                [config.appId]: ballMeta
-            },
-            text: ballMeta.participatedUserIds.length.toString()
-        });
-    }
-    static async moveToBucket(ball, meta, widgets) {
-        const bucket = BucketModel_BucketModel.get(meta.bucketType, widgets);
-        const update = {
-            id: ball.id,
-            x: bucket.x,
-            y: bucket.y,
-            text: '-',
-            metadata: {
-                [config.appId]: meta
-            }
-        };
-        Object.assign(ball, update);
-        await miro.board.widgets.update(update);
-    }
-    static async resetProportions(ball) {
-        Object.assign(ball, {
-            bounds: {
-                ...ball.bounds,
-                height: config.balls.radius,
-                width: config.balls.radius
-            },
-            height: config.balls.radius,
-            width: config.balls.radius
-        });
-        await miro.board.widgets.update(ball);
-    }
-}
-
 // CONCATENATED MODULE: ./src/models/POModel.ts
+
+
 
 
 
@@ -462,58 +532,19 @@ class POModel_POModel {
         const bucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.source, widgets);
         return bucketMeta ? bucketMeta.owner : null;
     }
-}
-
-// CONCATENATED MODULE: ./src/models/OwnerModel.ts
-
-
-
-
-
-
-
-
-
-class OwnerModel_OwnerModel {
-    static getWidget(widgets) {
-        return widgets.find(w => w.metadata[config.appId] && w.metadata[config.appId].gameOwner) || null;
-    }
-    static async create(x, y) {
-        // @ts-ignore
-        const onlineUsers = await miro.board.getOnlineUsers();
+    static async isCurrentUserPO(widgets) {
         const currentUserId = await miro.currentUser.getId();
-        const currentUser = onlineUsers.find(o => o.id === currentUserId);
-        await miro.board.widgets.create({
-            type: 'card',
-            title: `game owner: ${currentUser.name}`,
-            x,
-            y,
-            metadata: {
-                [config.appId]: {
-                    gameOwner: currentUserId,
-                    formType: formType.card
-                }
-            }
-        });
-    }
-    static getOwnerId(widgets) {
-        const widget = widgets.find(w => w.metadata[config.appId] && w.metadata[config.appId].gameOwner);
-        if (!widget) {
-            return null;
-        }
-        return widget.metadata[config.appId].gameOwner;
-    }
-    static async isCurrentUserOwner(widgets) {
-        const currentUserId = await miro.currentUser.getId();
-        const latestOwnerId = OwnerModel_OwnerModel.getOwnerId(widgets);
+        const latestOwnerId = POModel_POModel.getOwnerId(widgets);
         return latestOwnerId === currentUserId;
     }
-    static async trackChanges() {
-        // @ts-ignore
-        miro.addListener(miro.enums.event.ONLINE_USERS_CHANGED, OwnerModel_OwnerModel.addWidgetToUsers);
-        let isGameOwner = true;
-        while (isGameOwner) {
+    static async trackChanges(userId) {
+        while (POModel_POModel.isGameRunning) {
             const widgets = await miro.board.widgets.get();
+            const ownerId = POModel_POModel.getOwnerId(widgets);
+            if (ownerId !== userId) {
+                UserModel_UserModel.isGameRunning = false;
+                return;
+            }
             const areBucketsOverFlow = BucketModel_BucketModel.checkBucketsOverFlow(widgets);
             if (areBucketsOverFlow) {
                 await BucketModel_BucketModel.resetBucketsPosition(0, 0, widgets);
@@ -522,20 +553,12 @@ class OwnerModel_OwnerModel {
                 if (widget.metadata && widget.metadata[config.appId].formType === formType.bucket) {
                     await this.checkBucketProportions(widget);
                 }
-                if (widget.metadata && widget.metadata[config.appId] && widget.metadata[config.appId].formType === formType.ball) {
-                    await this.checkBallProportions(widget);
-                    await this.checkBallPosition(widget, widgets);
+                if (widget.metadata && widget.metadata[config.appId] && widget.metadata[config.appId].formType === formType.ball && widget.metadata[config.appId].owner === userId) {
+                    await BallModel_BallModel.checkBallProportions(widget);
+                    await this.checkBallPosition(userId, widget, widgets);
                 }
             }
-            if (!(await OwnerModel_OwnerModel.isCurrentUserOwner(widgets))) {
-                isGameOwner = false;
-            }
             await new Promise(res => setTimeout(res, 500));
-        }
-    }
-    static async checkBallProportions(ball) {
-        if (ball.bounds.height !== config.balls.radius || ball.bounds.width !== config.balls.radius) {
-            await BallModel_BallModel.resetProportions(ball);
         }
     }
     static async checkBucketProportions(bucket) {
@@ -543,45 +566,36 @@ class OwnerModel_OwnerModel {
             await BucketModel_BucketModel.resetProportions(bucket);
         }
     }
-    static async checkBallPosition(ball, widgets) {
-        const gameOwnerId = OwnerModel_OwnerModel.getOwnerId(widgets);
+    static async checkBallPosition(userId, ball, widgets) {
         const ballMeta = BallModel_BallModel.getMeta(ball);
+        const userCardWithBall = BallModel_BallModel.userCardWithBall(ball, widgets);
+        if (userCardWithBall && ball.lastModifiedUserId !== userId) {
+            ballMeta.bucketType = static_bucketType.draw;
+            BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
+            BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
+            return;
+        }
         const usersWidgets = UserModel_UserModel.getAllCreatedUsers(widgets); // todo replace with enum
         const sourceBucket = BucketModel_BucketModel.get(static_bucketType.source, widgets);
         const sourceBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.source, widgets);
-        const targetBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.target, widgets);
-        const drawBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.draw, widgets);
         const isInTargetBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.target, ball, widgets);
         if (!isInTargetBucket && ballMeta.bucketType === static_bucketType.target) {
             console.log('should return back to target bucket');
-            ballMeta.owner = targetBucketMeta.owner;
             ballMeta.bucketType = static_bucketType.target;
             BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
             BucketModel_BucketModel.updateBallsCount(static_bucketType.target, widgets);
             return;
         }
-        if (isInTargetBucket) {
-            if (usersWidgets.length > ballMeta.participatedUserIds.length) {
-                console.log('not all peers touched balls');
-                ballMeta.owner = drawBucketMeta.owner;
-                ballMeta.bucketType = static_bucketType.draw;
-                BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
-                BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
-            }
-            else if (ballMeta.owner !== targetBucketMeta.owner) {
-                console.log('update ball owner and bucket type', targetBucketMeta.owner, targetBucketMeta.bucketType);
-                ballMeta.owner = targetBucketMeta.owner;
-                ballMeta.bucketType = targetBucketMeta.bucketType;
-                BallModel_BallModel.updateMeta(ball, ballMeta);
-                BucketModel_BucketModel.updateBallsCount(static_bucketType.target, widgets);
-            }
+        if (isInTargetBucket && usersWidgets.length > ballMeta.participatedUserIds.length) {
+            console.log('not all peers touched balls');
+            ballMeta.bucketType = static_bucketType.draw;
+            BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
+            BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
             return;
         }
-        const userCardWithBall = BallModel_BallModel.userCardWithBall(ball, widgets);
         const isInSourceBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.source, ball, widgets);
         const isInDrawBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.draw, ball, widgets);
         if (!isInDrawBucket && ballMeta.bucketType === static_bucketType.draw) {
-            ballMeta.owner = drawBucketMeta.owner;
             ballMeta.bucketType = static_bucketType.draw;
             BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
             BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
@@ -592,81 +606,27 @@ class OwnerModel_OwnerModel {
                 await BallModel_BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, static_bucketType.source);
             }
         }
+        // todo check if ball has been moved to user card. If so - update owner. But if everybody touched the ball - it should be moved back to draw
+        if (userCardWithBall) {
+            //todo if all touched the ball - then move to draw, otherwise assign new owner to ball
+            ballMeta.participatedUserIds.push(userCardWithBall.metadata[config.appId].owner);
+            ballMeta.owner = userCardWithBall.metadata[config.appId].owner;
+            ballMeta.bucketType = null;
+            BallModel_BallModel.updateMeta(ball, ballMeta);
+            return;
+        }
         if (!userCardWithBall && !isInSourceBucket && !isInDrawBucket && !isInTargetBucket) {
             console.log('outside of all cards');
-            ballMeta.owner = drawBucketMeta.owner;
             ballMeta.bucketType = static_bucketType.draw;
             BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
             BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
             return;
-        }
-        const userBallsAmount = BallModel_BallModel.getUserBallsAmount(userCardWithBall, widgets);
-        if (userBallsAmount > config.rules.memberBallLimit) {
-            console.log('user took too much balls', userBallsAmount, config.rules.memberBallLimit);
-            console.log('removed', ball.id);
-            ballMeta.owner = drawBucketMeta.owner;
-            ballMeta.bucketType = static_bucketType.draw;
-            BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
-            BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
-            return;
-        }
-        if (userCardWithBall) {
-            const userCardWithBallMeta = UserModel_UserModel.getMeta(userCardWithBall);
-            const stickerUserId = userCardWithBallMeta.owner;
-            const ballOwnerUserId = ballMeta.owner;
-            const ballMovedByUserId = ball.lastModifiedUserId;
-            if (ballMovedByUserId !== ballOwnerUserId && ballMovedByUserId !== gameOwnerId) {
-                console.log('wrong user moved ball to card (not owner)', ballMovedByUserId, ballOwnerUserId);
-                ballMeta.owner = drawBucketMeta.owner;
-                ballMeta.bucketType = static_bucketType.draw;
-                BallModel_BallModel.moveToBucket(ball, ballMeta, widgets);
-                BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
-                return;
-            }
-            if (ballMovedByUserId !== gameOwnerId) {
-                //@ts-ignore
-                if (ballMeta.participatedUserIds.includes(ballMovedByUserId)) {
-                    return;
-                }
-                ballMeta.participatedUserIds.push(ballMovedByUserId);
-                ballMeta.owner = stickerUserId;
-                ballMeta.bucketType = null;
-                BallModel_BallModel.updateMeta(ball, ballMeta);
-                console.log('added', ball.metadata);
-            }
-        }
-    }
-    static async addWidgetToUsers(ev) {
-        const widgets = await miro.board.widgets.get();
-        const ownerId = OwnerModel_OwnerModel.getOwnerId(widgets);
-        let users = ev.data.filter(s => s.id !== ownerId);
-        const POId = POModel_POModel.getOwnerId(widgets);
-        if (!POId) {
-            await POModel_POModel.create(users[0].id, users[0].name, 0, 0, widgets);
-            users = users.slice(1);
-        }
-        else {
-            users = users.filter(u => u.id !== POId);
-        }
-        const createdUsers = UserModel_UserModel.getAllCreatedUsers(widgets)
-            .map(w => UserModel_UserModel.getMeta(w).owner);
-        for (const user of users) {
-            //@ts-ignore
-            if (!createdUsers.includes(user.id))
-                await UserModel_UserModel.create(user.id, user.name, -config.bucket.widthHeight - 100, 0);
-        }
-        for (const createdUser of createdUsers) {
-            const isUserOnline = !!users.find(u => u.id === createdUser);
-            if (!isUserOnline) {
-                await UserModel_UserModel.remove(createdUser, widgets);
-            }
         }
     }
 }
+POModel_POModel.isGameRunning = true;
 
 // CONCATENATED MODULE: ./src/index.ts
-
-
 
 
 
@@ -683,45 +643,76 @@ miro.onReady(async () => {
             }
         }
     });
-    const widgets = await miro.board.widgets.get();
-    if (await OwnerModel_OwnerModel.isCurrentUserOwner(widgets)) {
-        OwnerModel_OwnerModel.trackChanges();
-    }
 });
 async function onClick() {
-    const widgets = await miro.board.widgets.get();
-    const ownerWidget = OwnerModel_OwnerModel.getWidget(widgets);
-    return ownerWidget ?
-        await resetGame(widgets) :
-        await start(widgets);
-}
-async function start(widgets) {
-    let ownerWidget = OwnerModel_OwnerModel.getWidget(widgets);
-    if (ownerWidget) {
-        await resetGame(widgets);
+    const isAuthorized = await miro.isAuthorized();
+    if (!isAuthorized) {
+        await miro.authorize({
+            response_type: 'token',
+            redirect_uri: `https://${window.location.host}/auth-success.html`
+        });
+        return;
     }
     // @ts-ignore
     const onlineUsers = await miro.board.getOnlineUsers();
-    if (onlineUsers.length < 3) {
-        miro.showErrorNotification('there should be at least 3 online players to play');
+    const currentUserId = await miro.currentUser.getId();
+    const currentUsername = onlineUsers.find(u => u.id === currentUserId).name;
+    const widgets = await miro.board.widgets.get();
+    const POId = POModel_POModel.getOwnerId(widgets);
+    if (!POId) {
+        await POModel_POModel.create(currentUserId, currentUsername, 0 - config.bucket.widthHeight - 100, 0, widgets);
+        POModel_POModel.trackChanges(currentUserId);
         return;
     }
-    await OwnerModel_OwnerModel.create(0 - config.bucket.widthHeight - 100, 0);
-    await OwnerModel_OwnerModel.addWidgetToUsers({ data: onlineUsers });
-    OwnerModel_OwnerModel.trackChanges();
-}
-const resetGame = async (widgets) => {
-    //@ts-ignore
-    miro.removeListener(miro.enums.event.ONLINE_USERS_CHANGED, OwnerModel_OwnerModel.addWidgetToUsers);
-    const ballInTargetBucketWidgets = BallModel_BallModel.getBucketBalls(static_bucketType.target, widgets);
-    const ballInDrawBucketWidgets = BallModel_BallModel.getBucketBalls(static_bucketType.draw, widgets);
-    for (const widget of [...ballInDrawBucketWidgets, ...ballInTargetBucketWidgets]) {
-        await miro.board.widgets.deleteById(widget.id);
-        widgets = widgets.filter(w => w.id !== widget.id);
+    if (POId === currentUserId) {
+        // todo track his changes
+        POModel_POModel.trackChanges(currentUserId);
+        return;
     }
-    await BucketModel_BucketModel.updateBallsCount(static_bucketType.target, widgets);
-    await BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets);
+    const userWidget = UserModel_UserModel.get(currentUserId, widgets);
+    if (!userWidget) {
+        await UserModel_UserModel.create(currentUserId, currentUsername, -config.bucket.widthHeight - 100, 0);
+    }
+    UserModel_UserModel.trackChanges(currentUserId);
+}
+/*
+async function start(widgets: IWidget[]) {
+  let ownerWidget = OwnerModel.getWidget(widgets);
+
+  if (ownerWidget) {
+    await resetGame(widgets);
+  }
+
+  // @ts-ignore
+  const onlineUsers = await miro.board.getOnlineUsers();
+  if (onlineUsers.length < 3) {
+    miro.showErrorNotification('there should be at least 3 online players to play')
+    return;
+  }
+
+  await OwnerModel.create(0 - config.bucket.widthHeight - 100, 0);
+
+  await OwnerModel.addWidgetToUsers({ data: onlineUsers });
+  OwnerModel.trackChanges();
+}
+*/
+/*
+const resetGame = async (widgets: IWidget[]) => {
+  //@ts-ignore
+  miro.removeListener(miro.enums.event.ONLINE_USERS_CHANGED, OwnerModel.addWidgetToUsers);
+
+  const ballInTargetBucketWidgets = BallModel.getBucketBalls(BucketType.target, widgets);
+  const ballInDrawBucketWidgets = BallModel.getBucketBalls(BucketType.draw, widgets);
+
+  for (const widget of [...ballInDrawBucketWidgets, ...ballInTargetBucketWidgets]) {
+    await miro.board.widgets.deleteById(widget.id);
+    widgets = widgets.filter(w => w.id !== widget.id);
+  }
+
+  await BucketModel.updateBallsCount(BucketType.target, widgets);
+  await BucketModel.updateBallsCount(BucketType.draw, widgets);
 };
+*/
 
 
 /***/ })

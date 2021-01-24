@@ -136,4 +136,10 @@ export default class BallModel {
     await miro.board.widgets.update(ball);
   }
 
+  public static async checkBallProportions(ball: IShapeWidget) {
+    if (ball.bounds.height !== config.balls.radius || ball.bounds.width !== config.balls.radius) {
+      await BallModel.resetProportions(ball);
+    }
+  }
+
 }
