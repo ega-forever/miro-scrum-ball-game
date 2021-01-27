@@ -1,14 +1,14 @@
 import ICardWidget = SDK.ICardWidget;
+import IWidget = SDK.IWidget;
+import IShapeWidget = SDK.IShapeWidget;
 import formType from '../static/formType';
 import colors from '../static/colors';
 import BucketModel from './BucketModel';
 import BucketType from '../static/bucketType';
+import bucketType from '../static/bucketType';
 import config from '../config/index';
 import BallModel from './BallModel';
-import IWidget = SDK.IWidget;
 import UserModel from './UserModel';
-import bucketType from '../static/bucketType';
-import IShapeWidget = SDK.IShapeWidget;
 
 export default class POModel {
 
@@ -16,7 +16,7 @@ export default class POModel {
   public readonly sourceBucket: BucketModel;
   public readonly targetBucket: BucketModel;
   public readonly drawBucket: BucketModel;
-  public static isGameRunning = true;
+  public static isGameRunning = false;
 
   public constructor(widget: ICardWidget, sourceBucket: BucketModel, targetBucket: BucketModel, drawBucket: BucketModel) {
     this.widget = widget;
@@ -92,6 +92,7 @@ export default class POModel {
   }
 
   public static async trackChanges(userId: string) {
+    POModel.isGameRunning = true;
 
     while (POModel.isGameRunning) {
 
@@ -103,6 +104,7 @@ export default class POModel {
         return;
       }
 
+      await POModel.checkIfSourceBucketHasEnoughBalls(widgets);
       const areBucketsOverFlow = BucketModel.checkBucketsOverFlow(widgets);
 
       if (areBucketsOverFlow) {
@@ -131,54 +133,55 @@ export default class POModel {
     }
   }
 
+  private static async checkIfSourceBucketHasEnoughBalls(widgets: IWidget[]){
+    const sourceBucket = BucketModel.get(bucketType.source, widgets);
+    const sourceBucketMeta = BucketModel.getMeta(bucketType.source, widgets);
+    const ballsInSourceBucket = BallModel.getBucketBalls(bucketType.source, widgets);
+    for (let i = 0; i <= (config.balls.initialAmount - ballsInSourceBucket.length); i++) {
+      await BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, BucketType.source);
+    }
+  }
+
   private static async checkBallPosition(userId: string, ball: IShapeWidget, widgets: IWidget[]) {
     const ballMeta = BallModel.getMeta(ball);
 
     const userCardWithBall = BallModel.userCardWithBall(ball, widgets);
+    const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets);
+    const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets);
 
     if (userCardWithBall && ball.lastModifiedUserId !== userId) {
       ballMeta.bucketType = BucketType.draw;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.draw, widgets);
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
       return
     }
 
     const usersWidgets = UserModel.getAllCreatedUsers(widgets);// todo replace with enum
-    const sourceBucket = BucketModel.get(BucketType.source, widgets);
-    const sourceBucketMeta = BucketModel.getMeta(BucketType.source, widgets);
-
     const isInTargetBucket = BucketModel.isBallInBucket(BucketType.target, ball, widgets);
-
-    if (!isInTargetBucket && ballMeta.bucketType === bucketType.target) {
-      console.log('should return back to target bucket');
-      ballMeta.bucketType = BucketType.target;
-      BallModel.moveToBucket(ball, ballMeta, widgets)
-      BucketModel.updateBallsCount(BucketType.target, widgets)
-      return;
-    }
 
     if (isInTargetBucket && usersWidgets.length > ballMeta.participatedUserIds.length) {
       console.log('not all peers touched balls');
-      ballMeta.bucketType = BucketType.draw;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.draw, widgets)
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
       return;
     }
+
+    if (isInTargetBucket && usersWidgets.length === ballMeta.participatedUserIds.length) {
+      console.log('move ball to target');
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.target, widgets, targetBucketMeta.ballsCount + 1)
+      return;
+    }
+
 
     const isInSourceBucket = BucketModel.isBallInBucket(BucketType.source, ball, widgets);
     const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
 
     if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
       ballMeta.bucketType = BucketType.draw;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.draw, widgets)
-    }
-
-    if (!isInSourceBucket) {
-      const ballsInSourceBucketAmount = BallModel.getBucketBallsAmount(bucketType.source, widgets);
-      for (let i = 0; i <= (config.balls.initialAmount - ballsInSourceBucketAmount); i++) {
-        await BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, BucketType.source);
-      }
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+      return;
     }
 
     // todo check if ball has been moved to user card. If so - update owner. But if everybody touched the ball - it should be moved back to draw
@@ -192,16 +195,27 @@ export default class POModel {
     }
 
 
-    if (!userCardWithBall && !isInSourceBucket && !isInDrawBucket && !isInTargetBucket) {
+    if (!userCardWithBall && !isInSourceBucket && !isInTargetBucket) {
       console.log('outside of all cards');
-      ballMeta.bucketType = BucketType.draw;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.draw, widgets);
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
       return;
     }
 
 
   }
 
+  public static async stopTrack(){
+
+    const widgets = await miro.board.widgets.get();
+    const filtered = widgets.filter(w=> w.metadata[config.appId]);
+
+    for(const widget of filtered){
+      await miro.board.widgets.deleteById([widget.id])
+    }
+
+    POModel.isGameRunning = false;
+
+  }
 
 }

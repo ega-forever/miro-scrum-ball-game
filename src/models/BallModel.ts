@@ -59,7 +59,7 @@ export default class BallModel {
 
   public static getUserBallsAmount(userStickerWidget, widgets: IWidget[]): number {
 
-    if(!userStickerWidget){
+    if (!userStickerWidget) {
       return 1;
     }
 
@@ -75,17 +75,18 @@ export default class BallModel {
   }
 
   public static getBucketBallsAmount(bucketType: BucketType, widgets: IWidget[]): number {
-    const balls = BallModel.getBucketBalls(bucketType, widgets);
-    return balls.length;
+    const bucketMeta = BucketModel.getMeta(bucketType, widgets);
+    return bucketMeta.ballsCount;
   }
 
-  public static getBucketBalls(bucketType: BucketType, widgets: IWidget[]): IShapeWidget[] {
-    return widgets.filter(w =>
-      w.metadata[config.appId] &&
-      w.metadata[config.appId].formType === formType.ball &&
-      w.metadata[config.appId].bucketType === bucketType
-    ) as any;
-  }
+
+    public static getBucketBalls(bucketType: BucketType, widgets: IWidget[]): IShapeWidget[] {
+      return widgets.filter(w =>
+        w.metadata[config.appId] &&
+        w.metadata[config.appId].formType === formType.ball &&
+        w.metadata[config.appId].bucketType === bucketType
+      ) as any;
+    }
 
   public static async updateMeta(ball: IShapeWidget, ballMeta: Meta): Promise<void> {
 
@@ -104,6 +105,7 @@ export default class BallModel {
     });
   }
 
+/*
   public static async moveToBucket(ball: IShapeWidget, meta: Meta, widgets: IWidget[]): Promise<void> {
     const bucket = BucketModel.get(meta.bucketType, widgets);
 
@@ -120,6 +122,12 @@ export default class BallModel {
     Object.assign(ball, update);
     await miro.board.widgets.update(update);
   }
+*/
+
+  public static async destroy(ball: IShapeWidget): Promise<void> {
+    await miro.board.widgets.deleteById([ball.id]);
+  }
+
 
   public static async resetProportions(ball: IShapeWidget): Promise<void> {
 

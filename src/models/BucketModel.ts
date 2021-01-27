@@ -3,12 +3,12 @@ import IWidget = SDK.IWidget;
 import config from '../config/index';
 import BucketType from '../static/bucketType';
 import FormType from '../static/formType';
-import BallModel from './BallModel';
 
 interface Meta {
   owner: string,
   bucketType: BucketType,
-  formType: FormType.bucket
+  formType: FormType.bucket,
+  ballsCount: number
 }
 
 export default class BucketModel {
@@ -47,20 +47,21 @@ export default class BucketModel {
       style: {
         backgroundColor: color,
         textAlign: 'c',
-        textAlignVertical: 'b',
-        fontSize: 18,
+        textAlignVertical: 'm',
+        fontSize: 36,
         bold: 1
       },
       height: config.bucket.widthHeight,
       width: config.bucket.widthHeight,
       x,
       y,
-      text: '-',
+      text: type === BucketType.source ? '' : '0',
       metadata: {
         [config.appId]: {
           owner: ownerId,
           bucketType: type,
-          formType: FormType.bucket
+          formType: FormType.bucket,
+          ballsCount: 0
         } as Meta
       },
       capabilities: {
@@ -69,10 +70,10 @@ export default class BucketModel {
     });
   }
 
-  public static async updateBallsCount(type: BucketType, widgets: IWidget[]): Promise<void> {
+  public static async updateBallsCount(type: BucketType, widgets: IWidget[], ballsCount): Promise<void> {
     const bucket = BucketModel.get(type, widgets);
-    const ballsAmount = BallModel.getBucketBallsAmount(type, widgets);
-    bucket.text = ballsAmount.toString();
+    bucket.metadata[config.appId].ballsCount = ballsCount;
+    bucket.text = ballsCount.toString();
     await miro.board.widgets.update(bucket);
   }
 

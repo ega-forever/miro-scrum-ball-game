@@ -8,7 +8,6 @@ import BucketType from '../static/bucketType';
 import BucketModel from './BucketModel';
 import formType from '../static/formType';
 import BallModel from './BallModel';
-import bucketType from '../static/bucketType';
 
 interface Meta {
   owner: string,
@@ -17,7 +16,7 @@ interface Meta {
 
 export default class UserModel {
 
-  public static isGameRunning = true;
+  public static isGameRunning = false;
 
   public static get(userId: string, widgets: IWidget[]): IStickerWidget | null {
     return widgets.find(w =>
@@ -59,8 +58,9 @@ export default class UserModel {
     return widgets.filter(w => w.metadata[config.appId] && w.metadata[config.appId].formType === FormType.userSticker) as any;
   }
 
-
   public static async trackChanges(userId: string) {
+
+    UserModel.isGameRunning = true;
 
     while (UserModel.isGameRunning) { //todo check if user widget exists
 
@@ -91,53 +91,61 @@ export default class UserModel {
 
     const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets);
 
-    if(userCardWithBall &&
+    if (userCardWithBall &&
       currentUserCard.metadata[config.appId].owner === userCardWithBall.metadata[config.appId].owner &&
-      allUserBallsCount > config.rules.memberBallLimit){
-      ballMeta.bucketType = BucketType.draw;
-      ballMeta.owner = drawBucketMeta.owner;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.draw, widgets)
+      allUserBallsCount > config.rules.memberBallLimit) {
+      console.log('user reached limit in balls. Moving to draw bucket')
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
       return;
     }
 
-    if(userCardWithBall && currentUserCard.metadata[config.appId].owner !== userCardWithBall.metadata[config.appId].owner){
+    if (userCardWithBall && userId !== userCardWithBall.metadata[config.appId].owner) {
 
-      if(ballMeta.participatedUserIds.indexOf(userCardWithBall.metadata[config.appId].owner) === -1){
+      if (ball.lastModifiedUserId !== userId) {
+        console.log('wrong user touched ball');
+        BallModel.destroy(ball);
+        BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+        return;
+      }
+
+      if (ballMeta.participatedUserIds.indexOf(userCardWithBall.metadata[config.appId].owner) === -1) {
         ballMeta.participatedUserIds.push(userCardWithBall.metadata[config.appId].owner);
       }
 
       ballMeta.owner = userCardWithBall.metadata[config.appId].owner;
       ballMeta.bucketType = null;
       BallModel.updateMeta(ball, ballMeta);
+      return
     }
 
-    const sourceBucketMeta = BucketModel.getMeta(BucketType.source, widgets);
-
+    const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets);
     const isInTargetBucket = BucketModel.isBallInBucket(BucketType.target, ball, widgets);
 
     if (isInTargetBucket) {
-      ballMeta.bucketType = BucketType.target;
-      ballMeta.owner = sourceBucketMeta.owner;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.target, widgets)
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.target, widgets, targetBucketMeta.ballsCount + 1)
       return;
     }
 
     if (!userCardWithBall && !isInTargetBucket) {
       console.log('outside of all valid cards');
-      ballMeta.bucketType = BucketType.draw;
-      ballMeta.owner = drawBucketMeta.owner;
-      BallModel.moveToBucket(ball, ballMeta, widgets);
-      BucketModel.updateBallsCount(BucketType.draw, widgets);
+      BallModel.destroy(ball);
+      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
       return;
     }
   }
 
-
   public static async remove(userId: string, widgets: IWidget[]): Promise<void> {
     const widget = UserModel.get(userId, widgets);
     await miro.board.widgets.deleteById(widget.id);
+  }
+
+  public static async stopTrack(userId: string) {
+    const widgets = await miro.board.widgets.get();
+    const widget = UserModel.get(userId, widgets);
+    await miro.board.widgets.deleteById(widget.id);
+    UserModel.isGameRunning = false;
   }
 
 }
