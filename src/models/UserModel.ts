@@ -104,7 +104,7 @@ export default class UserModel extends CommonUserModel {
     for (const widget of widgets) {
 
       if (widget.metadata && widget.metadata[config.appId].formType === formType.bucket) {
-        await POModel.checkBucketProportions(widget);
+        await this.checkBucketProportions(widget);
       }
 
       if (

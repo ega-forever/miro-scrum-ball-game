@@ -40,7 +40,7 @@ export default class CommonUserModel {
     for (const widget of widgets) {
 
       if (widget.metadata && widget.metadata[config.appId].formType === formType.bucket) {
-        await POModel.checkBucketProportions(widget);
+        await this.checkBucketProportions(widget);
       }
 
       if (
@@ -69,5 +69,11 @@ export default class CommonUserModel {
   }
 
   protected async checkWrongMovedBallPosition(ball: IShapeWidget, widgets: IWidget[]){}
+
+  protected async checkBucketProportions(bucket: any) {
+    if (bucket.height !== config.bucket.widthHeight || bucket.width !== config.bucket.widthHeight) {
+      await BucketModel.resetProportions(bucket);
+    }
+  }
 
 }

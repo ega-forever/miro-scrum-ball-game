@@ -19,7 +19,7 @@ miro.onReady(async () => {
 });
 
 let user = null;
-// let PO = new POModel();
+let PO = null;
 
 async function onClick() {
 
@@ -38,10 +38,16 @@ async function onClick() {
   const currentUserId = await miro.currentUser.getId();
   const currentUsername = onlineUsers.find(u => u.id === currentUserId).name;
   const widgets = await miro.board.widgets.get();
-  const POId = POModel.getOwnerId(widgets);
+  PO = POModel.get(widgets);
 
-  if (POId === currentUserId && POModel.hasCanvasListener()) {
-    await POModel.stopTrack();
+  if (PO && PO.widget.metadata[config.appId].owner === currentUserId) {
+    await PO.stopTrack();
+    return
+  }
+
+  if (!PO) {
+    PO = await POModel.create(currentUserId, currentUsername, 0 - config.bucket.widthHeight - 100, 0, widgets);
+    PO.addCanvasListener();
     return
   }
 
@@ -51,18 +57,6 @@ async function onClick() {
     await user.stopTrack(currentUserId);
     return
   }
-
-  if (!POId) {
-    await POModel.create(currentUserId, currentUsername, 0 - config.bucket.widthHeight - 100, 0, widgets);
-    POModel.addCanvasListener();
-    return
-  }
-
-  if (POId === currentUserId) {
-    POModel.addCanvasListener();
-    return
-  }
-
 
   if (!user) {
     user = await UserModel.create(currentUserId, currentUsername, -config.bucket.widthHeight * 2 - 100, 0);
