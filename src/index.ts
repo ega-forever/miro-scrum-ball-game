@@ -26,7 +26,7 @@ async function onClick() {
   if (!isAuthorized) {
     await miro.authorize({
       response_type: 'token',
-      redirect_uri: `https://${ window.location.host }/auth-success.html`
+      redirect_uri: 'https://ega-forever.github.io/miro-scrum-ball-game/auth-success.html'
     });
     return;
   }
