@@ -18,6 +18,8 @@ miro.onReady(async () => {
   });
 });
 
+let user = null;
+// let PO = new POModel();
 
 async function onClick() {
 
@@ -38,33 +40,33 @@ async function onClick() {
   const widgets = await miro.board.widgets.get();
   const POId = POModel.getOwnerId(widgets);
 
+  if (POId === currentUserId && POModel.hasCanvasListener()) {
+    await POModel.stopTrack();
+    return
+  }
 
-    if (POId === currentUserId && POModel.isGameRunning) {
-      await POModel.stopTrack();
-      return
-    }
+  user = UserModel.get(currentUserId, widgets);
 
-    if((await UserModel.get(currentUserId, widgets)) && UserModel.isGameRunning) {
-      await UserModel.stopTrack(currentUserId);
-      return
-    }
+  if (user && user.hasCanvasListener()) {
+    await user.stopTrack(currentUserId);
+    return
+  }
 
   if (!POId) {
     await POModel.create(currentUserId, currentUsername, 0 - config.bucket.widthHeight - 100, 0, widgets);
-    POModel.trackChanges(currentUserId);
+    POModel.addCanvasListener();
     return
   }
 
   if (POId === currentUserId) {
-    POModel.trackChanges(currentUserId);
+    POModel.addCanvasListener();
     return
   }
 
-  const userWidget = UserModel.get(currentUserId, widgets);
 
-  if (!userWidget) {
-    await UserModel.create(currentUserId, currentUsername, -config.bucket.widthHeight * 2 - 100, 0);
+  if (!user) {
+    user = await UserModel.create(currentUserId, currentUsername, -config.bucket.widthHeight * 2 - 100, 0);
   }
 
-  UserModel.trackChanges(currentUserId);
+  user.addCanvasListener();
 }

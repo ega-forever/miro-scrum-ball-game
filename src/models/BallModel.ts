@@ -105,24 +105,20 @@ export default class BallModel {
     });
   }
 
-/*
-  public static async moveToBucket(ball: IShapeWidget, meta: Meta, widgets: IWidget[]): Promise<void> {
-    const bucket = BucketModel.get(meta.bucketType, widgets);
+  public static async moveToBucket(bucketType: BucketType, ball: IShapeWidget, widgets: IWidget[]): Promise<void> {
+    const bucket = BucketModel.get(bucketType, widgets);
 
     const update = {
       id: ball.id,
       x: bucket.x,
       y: bucket.y,
-      text: '-',
-      metadata: {
-        [config.appId]: meta
-      }
+      text: '',
+      metadata: ball.metadata
     };
 
     Object.assign(ball, update);
     await miro.board.widgets.update(update);
   }
-*/
 
   public static async destroy(ball: IShapeWidget): Promise<void> {
     await miro.board.widgets.deleteById([ball.id]);
