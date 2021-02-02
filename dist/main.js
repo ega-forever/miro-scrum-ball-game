@@ -389,8 +389,10 @@ class UserModel_UserModel extends CommonUserModel_CommonUserModel {
                 if (widget.metadata[config.appId].owner === userId) {
                     await BallModel_BallModel.checkBallProportions(widget);
                     await this.checkOwnBallPosition(userId, widget, widgets);
+                    continue;
                 }
                 if (widget.metadata[config.appId].owner !== userId && widget.lastModifiedUserId === userId) {
+                    console.log('super user owner', widget.metadata[config.appId].owner, widget.lastModifiedUserId);
                     await this.checkWrongMovedBallPosition(widget, widgets);
                 }
             }
@@ -438,17 +440,16 @@ class UserModel_UserModel extends CommonUserModel_CommonUserModel {
             return;
         }
     }
-    //todo move po ball / or more to another card
     async checkWrongMovedBallPosition(ball, widgets) {
         const POId = POModel_POModel.getOwnerId(widgets);
         if (ball.metadata[config.appId].owner === POId) {
             console.log('ive moved owner ball');
             BallModel_BallModel.moveToBucket(static_bucketType.source, ball, widgets);
             return;
-            // todo move ball back
         }
         const drawBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.draw, widgets);
-        // todo remove ball
+        console.log('wrong user 123');
+        // todo check
         BallModel_BallModel.destroy(ball);
         BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
     }

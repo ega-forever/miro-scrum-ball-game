@@ -115,9 +115,11 @@ export default class UserModel extends CommonUserModel {
         if (widget.metadata[config.appId].owner === userId) {
           await BallModel.checkBallProportions(widget as any);
           await this.checkOwnBallPosition(userId, widget as any, widgets);
+          continue;
         }
 
         if (widget.metadata[config.appId].owner !== userId && widget.lastModifiedUserId === userId) {
+          console.log('super user owner', widget.metadata[config.appId].owner, widget.lastModifiedUserId)
           await this.checkWrongMovedBallPosition(widget as any, widgets);
         }
       }
@@ -177,7 +179,6 @@ export default class UserModel extends CommonUserModel {
     }
   }
 
-  //todo move po ball / or more to another card
   protected async checkWrongMovedBallPosition(ball: IShapeWidget, widgets: IWidget[]) {
 
     const POId = POModel.getOwnerId(widgets);
@@ -186,12 +187,13 @@ export default class UserModel extends CommonUserModel {
       console.log('ive moved owner ball')
       BallModel.moveToBucket(bucketType.source, ball, widgets)
       return
-      // todo move ball back
     }
 
     const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets);
+    console.log('wrong user 123')
 
-    // todo remove ball
+    // todo check
+
     BallModel.destroy(ball);
     BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
   }
