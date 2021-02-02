@@ -117,16 +117,15 @@ var FormType;
     FormType[FormType["bucket"] = 2] = "bucket";
     FormType[FormType["card"] = 3] = "card";
     FormType[FormType["userSticker"] = 4] = "userSticker";
-    FormType[FormType["guestUserCard"] = 5] = "guestUserCard";
 })(FormType || (FormType = {}));
 /* harmony default export */ var formType = (FormType);
 
 // CONCATENATED MODULE: ./src/static/colors.ts
 /* harmony default export */ var colors = ({
     ball: '#2d9bf0',
-    sourceBucket: '#cee741',
-    targetBucket: '#fac710',
-    drawBucket: '#9c258e',
+    sourceBucket: '#fac710',
+    targetBucket: '#cee741',
+    drawBucket: '#d62828',
     sticker: '#f16c7f'
 });
 
@@ -198,7 +197,7 @@ class BucketModel_BucketModel {
         await miro.board.widgets.update(bucket);
     }
     static checkBucketsOverFlow(widgets) {
-        const buckets = widgets.filter(w => w.metadata[config.appId].formType === formType.bucket);
+        const buckets = widgets.filter(w => w.metadata[config.appId] && w.metadata[config.appId].formType === formType.bucket);
         for (let i = 0; i < buckets.length; i++) {
             for (let s = 0; s < buckets.length; s++) {
                 if (i == s) {
@@ -426,9 +425,16 @@ class UserModel_UserModel extends CommonUserModel_CommonUserModel {
             BallModel_BallModel.updateMeta(ball, ballMeta);
             return;
         }
+        const usersWidgets = UserModel_UserModel.getAllCreatedUsers(widgets);
         const targetBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.target, widgets);
         const isInTargetBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.target, ball, widgets);
         if (isInTargetBucket) {
+            if (usersWidgets.length + 1 > ballMeta.participatedUserIds.length) {
+                console.log('not all peers touched balls', usersWidgets.length, ballMeta.participatedUserIds);
+                BallModel_BallModel.destroy(ball);
+                BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+                return;
+            }
             BallModel_BallModel.destroy(ball);
             BucketModel_BucketModel.updateBallsCount(static_bucketType.target, widgets, targetBucketMeta.ballsCount + 1);
             return;
@@ -443,7 +449,7 @@ class UserModel_UserModel extends CommonUserModel_CommonUserModel {
     async checkWrongMovedBallPosition(ball, widgets) {
         const POId = POModel_POModel.getOwnerId(widgets);
         if (ball.metadata[config.appId].owner === POId) {
-            console.log('ive moved owner ball');
+            console.log('i`ve moved owner ball');
             BallModel_BallModel.moveToBucket(static_bucketType.source, ball, widgets);
             return;
         }
@@ -474,7 +480,7 @@ class BallModel_BallModel {
     static getMeta(widget) {
         return widget ? widget.metadata[config.appId] : null;
     }
-    static async create(x, y, owner, index, color, bucketType) {
+    static async create(x, y, owner, index, color, bucketType, ownerId) {
         await miro.board.widgets.create({
             type: 'shape',
             style: {
@@ -487,9 +493,8 @@ class BallModel_BallModel {
             y,
             metadata: {
                 [config.appId]: {
-                    ballIndex: index,
                     owner,
-                    participatedUserIds: [],
+                    participatedUserIds: [ownerId],
                     bucketType,
                     formType: formType.ball
                 }
@@ -533,7 +538,7 @@ class BallModel_BallModel {
             metadata: {
                 [config.appId]: ballMeta
             },
-            text: ballMeta.participatedUserIds.length.toString()
+            text: (ballMeta.participatedUserIds.length - 1).toString()
         });
     }
     static async moveToBucket(bucketType, ball, widgets) {
@@ -631,7 +636,7 @@ class POModel_POModel extends CommonUserModel_CommonUserModel {
             }
         });
         for (let i = 0; i < config.balls.initialAmount; i++) {
-            await BallModel_BallModel.create(buckets[0].x, buckets[0].y, userId, i, colors.ball, buckets[0].type);
+            await BallModel_BallModel.create(buckets[0].x, buckets[0].y, userId, i, colors.ball, buckets[0].type, userId);
         }
         return new POModel_POModel(widget);
     }
@@ -650,15 +655,15 @@ class POModel_POModel extends CommonUserModel_CommonUserModel {
         return widget ? new POModel_POModel(widget) : null;
     }
     async customCheck(userId, widgets) {
-        await this.checkIfSourceBucketHasEnoughBalls(widgets);
+        await this.checkIfSourceBucketHasEnoughBalls(userId, widgets);
         return true;
     }
-    async checkIfSourceBucketHasEnoughBalls(widgets) {
+    async checkIfSourceBucketHasEnoughBalls(userId, widgets) {
         const sourceBucket = BucketModel_BucketModel.get(static_bucketType.source, widgets);
         const sourceBucketMeta = BucketModel_BucketModel.getMeta(static_bucketType.source, widgets);
         const ballsInSourceBucket = BallModel_BallModel.getBucketBalls(static_bucketType.source, widgets);
         for (let i = 0; i <= (config.balls.initialAmount - ballsInSourceBucket.length); i++) {
-            await BallModel_BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, static_bucketType.source);
+            await BallModel_BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, static_bucketType.source, userId);
         }
     }
     async checkOwnBallPosition(userId, ball, widgets) {
@@ -673,7 +678,7 @@ class POModel_POModel extends CommonUserModel_CommonUserModel {
         }
         const usersWidgets = UserModel_UserModel.getAllCreatedUsers(widgets); // todo replace with enum
         const isInTargetBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.target, ball, widgets);
-        if (isInTargetBucket && usersWidgets.length > ballMeta.participatedUserIds.length) {
+        if (isInTargetBucket && usersWidgets.length + 1 > ballMeta.participatedUserIds.length) {
             console.log('not all peers touched balls');
             BallModel_BallModel.destroy(ball);
             BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
@@ -686,13 +691,14 @@ class POModel_POModel extends CommonUserModel_CommonUserModel {
             return;
         }
         const isInSourceBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.source, ball, widgets);
-        const isInDrawBucket = BucketModel_BucketModel.isBallInBucket(static_bucketType.draw, ball, widgets);
-        if (!isInDrawBucket && ballMeta.bucketType === static_bucketType.draw) {
-            ballMeta.bucketType = static_bucketType.draw;
-            BallModel_BallModel.destroy(ball);
-            BucketModel_BucketModel.updateBallsCount(static_bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
-            return;
-        }
+        /*    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
+        
+            if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
+              ballMeta.bucketType = BucketType.draw;
+              BallModel.destroy(ball);
+              BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+              return;
+            }*/
         if (userCardWithBall) {
             const allUserBallsCount = BallModel_BallModel.getUserBallsAmount(userCardWithBall, widgets);
             if (userCardWithBall &&

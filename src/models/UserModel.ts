@@ -162,10 +162,19 @@ export default class UserModel extends CommonUserModel {
       return
     }
 
+    const usersWidgets = UserModel.getAllCreatedUsers(widgets);
     const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets);
     const isInTargetBucket = BucketModel.isBallInBucket(BucketType.target, ball, widgets);
 
     if (isInTargetBucket) {
+
+      if(usersWidgets.length + 1 > ballMeta.participatedUserIds.length){
+        console.log('not all peers touched balls', usersWidgets.length, ballMeta.participatedUserIds);
+        BallModel.destroy(ball);
+        BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+        return;
+      }
+
       BallModel.destroy(ball);
       BucketModel.updateBallsCount(BucketType.target, widgets, targetBucketMeta.ballsCount + 1)
       return;
@@ -184,7 +193,7 @@ export default class UserModel extends CommonUserModel {
     const POId = POModel.getOwnerId(widgets);
 
     if (ball.metadata[config.appId].owner === POId) {
-      console.log('ive moved owner ball')
+      console.log('i`ve moved owner ball')
       BallModel.moveToBucket(bucketType.source, ball, widgets)
       return
     }

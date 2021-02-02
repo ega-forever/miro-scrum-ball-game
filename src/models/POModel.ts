@@ -70,7 +70,7 @@ export default class POModel extends CommonUserModel {
     });
 
     for (let i = 0; i < config.balls.initialAmount; i++) {
-      await BallModel.create(buckets[0].x, buckets[0].y, userId, i, colors.ball, buckets[0].type)
+      await BallModel.create(buckets[0].x, buckets[0].y, userId, i, colors.ball, buckets[0].type, userId)
     }
 
     return new POModel(widget as any);
@@ -99,16 +99,16 @@ export default class POModel extends CommonUserModel {
   }
 
   protected async customCheck(userId: string, widgets: IWidget[]) {
-    await this.checkIfSourceBucketHasEnoughBalls(widgets);
+    await this.checkIfSourceBucketHasEnoughBalls(userId, widgets);
     return true;
   }
 
-  private async checkIfSourceBucketHasEnoughBalls(widgets: IWidget[]) {
+  private async checkIfSourceBucketHasEnoughBalls(userId: string, widgets: IWidget[]) {
     const sourceBucket = BucketModel.get(bucketType.source, widgets);
     const sourceBucketMeta = BucketModel.getMeta(bucketType.source, widgets);
     const ballsInSourceBucket = BallModel.getBucketBalls(bucketType.source, widgets);
     for (let i = 0; i <= (config.balls.initialAmount - ballsInSourceBucket.length); i++) {
-      await BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, BucketType.source);
+      await BallModel.create(sourceBucket.x, sourceBucket.y, sourceBucketMeta.owner, 1, colors.ball, BucketType.source, userId);
     }
   }
 
@@ -128,7 +128,7 @@ export default class POModel extends CommonUserModel {
     const usersWidgets = UserModel.getAllCreatedUsers(widgets);// todo replace with enum
     const isInTargetBucket = BucketModel.isBallInBucket(BucketType.target, ball, widgets);
 
-    if (isInTargetBucket && usersWidgets.length > ballMeta.participatedUserIds.length) {
+    if (isInTargetBucket && usersWidgets.length + 1 > ballMeta.participatedUserIds.length) {
       console.log('not all peers touched balls');
       BallModel.destroy(ball);
       BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
@@ -143,14 +143,14 @@ export default class POModel extends CommonUserModel {
     }
 
     const isInSourceBucket = BucketModel.isBallInBucket(BucketType.source, ball, widgets);
-    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
+/*    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
 
     if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
       ballMeta.bucketType = BucketType.draw;
       BallModel.destroy(ball);
       BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
       return;
-    }
+    }*/
 
     if (userCardWithBall) {
 

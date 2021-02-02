@@ -8,7 +8,6 @@ import BucketModel from './BucketModel';
 import IWidget = SDK.IWidget;
 
 interface Meta {
-  ballIndex: number,
   owner: string,
   participatedUserIds: string[],
   bucketType: BucketType,
@@ -26,7 +25,7 @@ export default class BallModel {
     return widget ? widget.metadata[config.appId] : null;
   }
 
-  public static async create(x: number, y: number, owner: string, index: number, color: string, bucketType: BucketType): Promise<void> {
+  public static async create(x: number, y: number, owner: string, index: number, color: string, bucketType: BucketType, ownerId: string): Promise<void> {
     await miro.board.widgets.create({
       type: 'shape',
       style: {
@@ -39,9 +38,8 @@ export default class BallModel {
       y,
       metadata: {
         [config.appId]: {
-          ballIndex: index,
           owner,
-          participatedUserIds: [],
+          participatedUserIds: [ownerId],
           bucketType,
           formType: FormType.ball
         } as Meta
@@ -101,7 +99,7 @@ export default class BallModel {
       metadata: {
         [config.appId]: ballMeta
       },
-      text: ballMeta.participatedUserIds.length.toString()
+      text: (ballMeta.participatedUserIds.length - 1).toString()
     });
   }
 

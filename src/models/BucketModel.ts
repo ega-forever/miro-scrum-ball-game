@@ -78,7 +78,7 @@ export default class BucketModel {
   }
 
   public static checkBucketsOverFlow(widgets: IWidget[]) {
-    const buckets: any = widgets.filter(w => w.metadata[config.appId].formType === FormType.bucket)
+    const buckets: any = widgets.filter(w => w.metadata[config.appId] && w.metadata[config.appId].formType === FormType.bucket)
 
     for (let i = 0; i < buckets.length; i++) {
       for (let s = 0; s < buckets.length; s++) {
