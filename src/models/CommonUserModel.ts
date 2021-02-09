@@ -1,7 +1,6 @@
 import BucketModel from './BucketModel';
 import config from '../config/index';
 import formType from '../static/formType';
-import POModel from './POModel';
 import BallModel from './BallModel';
 import IWidget = SDK.IWidget;
 import IShapeWidget = SDK.IShapeWidget;

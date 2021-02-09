@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script type="text/javascript" src="https://miro.com/app/static/sdk.1.1.js"></script>
+    <script type="text/javascript" src="dist/modal.js"></script>
+</head>
+<body class="d-flex h-100 text-center text-white bg-dark">
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <main class="px-3">
+        <h1>Scrum balls game</h1>
+        <p class="lead">Super scrum ball game.</p>
+        <p class="lead">
+            <button class="btn btn-lg btn-secondary fw-bold" id="start-game-po" style="display: none" onclick="onStartGameClick()">Start game as PO</button>
+            <button class="btn btn-lg btn-secondary fw-bold" id="reset-game-po" style="display: none" onclick="">Reset Scores</button>
+            <button class="btn btn-lg btn-secondary fw-bold" id="end-game-po" style="display: none" onclick="onEndGameClick()">End Game</button>
+            <button class="btn btn-lg btn-secondary fw-bold" id="join-game-user" style="display: none" onclick="onUserJoinGameClick()">Join Game</button>
+            <button class="btn btn-lg btn-secondary fw-bold" id="leave-game-user" style="display: none" onclick="onUserLeaveGameClick()">Leave Game</button>
+        </p>
+    </main>
+</div>
+
+
+</body>
+</html>

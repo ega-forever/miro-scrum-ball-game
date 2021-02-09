@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -829,87 +829,52 @@ class CommonUserModel {
 
 
 /***/ }),
-/* 10 */
+/* 10 */,
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _static_actionType__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
-/* harmony import */ var _models_POModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
-/* harmony import */ var _models_UserModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(6);
-/* harmony import */ var _config_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(0);
+/* harmony import */ var _models_POModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8);
+/* harmony import */ var _models_UserModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6);
+/* harmony import */ var _config_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(0);
+/* harmony import */ var _static_actionType__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(7);
 
 
 
 
+//@ts-ignore
+window.onStartGameClick = async () => {
+    await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].startNewGamePO });
+};
+//@ts-ignore
+window.onUserLeaveGameClick = async () => {
+    await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].leaveGameUser });
+};
+//@ts-ignore
+window.onUserJoinGameClick = async () => {
+    await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].joinGameUser });
+};
+//@ts-ignore
+window.onEndGameClick = async () => {
+    await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].endGamePO });
+};
 const init = async () => {
-    const startIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><title>BUSINESS</title><g id="scrum_ball_game" data-name="02.TARGET"><path d="M25.06,9.76a11,11,0,1,1-2.82-2.82l1.43-1.43a13,13,0,1,0,2.82,2.82Z"/><path d="M20.06,9.12A7.9,7.9,0,0,0,16,8a8,8,0,1,0,8,8,7.9,7.9,0,0,0-1.12-4.06l-1.47,1.47A5.9,5.9,0,0,1,22,16a6,6,0,1,1-6-6,5.9,5.9,0,0,1,2.59.59Z"/><circle cx="16" cy="16" r="2"/><path d="M28.78,3.22V.78L26.59,3l-.44,1.77a1,1,0,0,0-.58.27l-7.77,7.77a1,1,0,1,0,1.41,1.41L27,6.43a1,1,0,0,0,.27-.58L29,5.41l2.2-2.2Z"/></g></svg>`;
-    let currentUserId;
-    let widgets;
-    let PO;
-    let user;
-    try {
-        currentUserId = await miro.currentUser.getId();
-        widgets = await miro.board.widgets.get();
-        PO = _models_POModel__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].get(widgets);
-        user = _models_UserModel__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].get(currentUserId, widgets);
+    const currentUserId = await miro.currentUser.getId();
+    const widgets = await miro.board.widgets.get();
+    let PO = _models_POModel__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].get(widgets);
+    if (PO && PO.widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].appId].owner === currentUserId) {
+        document.getElementById('end-game-po').style.display = 'inline-block';
     }
-    catch (e) {
+    if (!PO) {
+        document.getElementById('start-game-po').style.display = 'inline-block';
     }
-    if (PO && PO.widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].appId].owner === currentUserId && !PO.hasCanvasListener()) {
-        PO.addCanvasListener();
+    let user = _models_UserModel__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].get(currentUserId, widgets);
+    if (user) {
+        document.getElementById('leave-game-user').style.display = 'inline-block';
     }
-    if (user && !user.hasCanvasListener()) {
-        user.addCanvasListener();
-    }
-    const onClick = async () => {
-        const isAuthorized = await miro.isAuthorized();
-        if (!isAuthorized) {
-            await miro.authorize({
-                response_type: 'token',
-                redirect_uri: 'https://ega-forever.github.io/miro-scrum-ball-game/auth-success.html'
-            });
-            return;
-        }
-        const result = await miro.board.ui.openModal('modal.html');
-        if (result) {
-            await processSelectedAction(result.option);
-        }
-        return;
-    };
-    miro.onReady(async () => {
-        await miro.initialize({
-            extensionPoints: {
-                bottomBar: async () => {
-                    return {
-                        title: 'Scrum balls (start / stop)',
-                        svgIcon: startIcon,
-                        onClick: onClick
-                    };
-                }
-            }
-        });
-    });
-    async function processSelectedAction(option) {
-        // @ts-ignore
-        const onlineUsers = await miro.board.getOnlineUsers();
-        currentUserId = await miro.currentUser.getId();
-        const currentUsername = onlineUsers.find(u => u.id === currentUserId).name;
-        widgets = await miro.board.widgets.get();
-        if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].startNewGamePO) {
-            PO = await _models_POModel__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].create(currentUserId, currentUsername, 0 - _config_index__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].bucket.widthHeight - 100, 0, widgets);
-            PO.addCanvasListener();
-        }
-        if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].leaveGameUser) {
-            await user.stopTrack();
-        }
-        if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].joinGameUser) {
-            user = await _models_UserModel__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].create(currentUserId, currentUsername, -_config_index__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].bucket.widthHeight * 2 - 100, 0);
-            user.addCanvasListener();
-        }
-        if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].endGamePO) {
-            await PO.stopTrack();
-        }
+    if (PO && PO.widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].appId].owner !== currentUserId && !user) {
+        document.getElementById('join-game-user').style.display = 'inline-block';
     }
 };
 init();

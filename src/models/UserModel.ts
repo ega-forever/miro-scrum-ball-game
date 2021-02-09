@@ -76,8 +76,7 @@ export default class UserModel extends CommonUserModel {
     const userWidget = UserModel.get(userId, widgets);
 
     if (!userWidget) {
-      miro.removeListener('CANVAS_CLICKED', this.listener);
-      this.listener = null;
+      await this.stopTrack();
       return false;
     }
 

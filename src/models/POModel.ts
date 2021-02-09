@@ -99,6 +99,11 @@ export default class POModel extends CommonUserModel {
   }
 
   protected async customCheck(userId: string, widgets: IWidget[]) {
+    if (POModel.getOwnerId(widgets) === null) {
+      await this.stopTrack();
+      return false;
+    }
+
     await this.checkIfSourceBucketHasEnoughBalls(userId, widgets);
     return true;
   }
@@ -143,14 +148,14 @@ export default class POModel extends CommonUserModel {
     }
 
     const isInSourceBucket = BucketModel.isBallInBucket(BucketType.source, ball, widgets);
-/*    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
+    /*    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
 
-    if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
-      ballMeta.bucketType = BucketType.draw;
-      BallModel.destroy(ball);
-      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
-      return;
-    }*/
+        if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
+          ballMeta.bucketType = BucketType.draw;
+          BallModel.destroy(ball);
+          BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+          return;
+        }*/
 
     if (userCardWithBall) {
 
