@@ -574,6 +574,7 @@ var ActionType;
     ActionType[ActionType["leaveGameUser"] = 2] = "leaveGameUser";
     ActionType[ActionType["joinGameUser"] = 3] = "joinGameUser";
     ActionType[ActionType["endGamePO"] = 4] = "endGamePO";
+    ActionType[ActionType["resetGamePO"] = 5] = "resetGamePO";
 })(ActionType || (ActionType = {}));
 /* harmony default export */ __webpack_exports__["a"] = (ActionType);
 
@@ -759,6 +760,11 @@ class POModel extends _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__[/* default *
         miro.removeListener('CANVAS_CLICKED', this.listener);
         this.listener = null;
     }
+    async resetScores() {
+        const widgets = await miro.board.widgets.get();
+        _BucketModel__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].updateBallsCount(_static_bucketType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].draw, widgets, 0);
+        _BucketModel__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].updateBallsCount(_static_bucketType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].target, widgets, 0);
+    }
 }
 
 
@@ -859,12 +865,17 @@ window.onUserJoinGameClick = async () => {
 window.onEndGameClick = async () => {
     await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].endGamePO });
 };
+//@ts-ignore
+window.onResetGameClick = async () => {
+    await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].resetGamePO });
+};
 const init = async () => {
     const currentUserId = await miro.currentUser.getId();
     const widgets = await miro.board.widgets.get();
     let PO = _models_POModel__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].get(widgets);
     if (PO && PO.widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].appId].owner === currentUserId) {
         document.getElementById('end-game-po').style.display = 'inline-block';
+        document.getElementById('reset-game-po').style.display = 'inline-block';
     }
     if (!PO) {
         document.getElementById('start-game-po').style.display = 'inline-block';

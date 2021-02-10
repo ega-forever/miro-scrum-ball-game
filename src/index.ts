@@ -40,7 +40,7 @@ const init = async () => {
       return;
     }
 
-    const result: { option: ActionType } = await miro.board.ui.openModal('modal.html');
+    const result: { option: ActionType } = await miro.board.ui.openModal('modal.html', {width: 400, height: 175});
     if (result) {
       await processSelectedAction(result.option);
     }
@@ -85,6 +85,10 @@ const init = async () => {
 
     if (option === ActionType.endGamePO) {
       await PO.stopTrack();
+    }
+
+    if (option === ActionType.resetGamePO) {
+      await PO.resetScores();
     }
 
   }

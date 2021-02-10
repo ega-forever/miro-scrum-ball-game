@@ -211,4 +211,10 @@ export default class POModel extends CommonUserModel {
     this.listener = null;
   }
 
+  public async resetScores(){
+    const widgets = await miro.board.widgets.get();
+    BucketModel.updateBallsCount(BucketType.draw, widgets, 0);
+    BucketModel.updateBallsCount(BucketType.target, widgets, 0);
+  }
+
 }

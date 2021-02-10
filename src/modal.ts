@@ -23,6 +23,11 @@ window.onEndGameClick = async () => {
   await miro.board.ui.closeModal({ option: ActionType.endGamePO });
 }
 
+//@ts-ignore
+window.onResetGameClick = async () => {
+  await miro.board.ui.closeModal({ option: ActionType.resetGamePO });
+}
+
 const init = async () => {
 
   const currentUserId = await miro.currentUser.getId();
@@ -32,6 +37,7 @@ const init = async () => {
 
   if (PO && PO.widget.metadata[config.appId].owner === currentUserId) {
     document.getElementById('end-game-po').style.display = 'inline-block';
+    document.getElementById('reset-game-po').style.display = 'inline-block';
   }
 
   if (!PO) {
