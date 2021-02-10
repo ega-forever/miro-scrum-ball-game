@@ -30,6 +30,7 @@ window.onResetGameClick = async () => {
 
 const init = async () => {
 
+  console.log(miro)
   const currentUserId = await miro.currentUser.getId();
   const widgets = await miro.board.widgets.get();
   let PO = POModel.get(widgets);
