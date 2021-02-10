@@ -47,21 +47,19 @@ const init = async () => {
     return
   }
 
-  miro.onReady(async () => {
-    await miro.initialize({
-      extensionPoints: {
-        bottomBar: async () => {
-          return {
-            title: 'Scrum balls (start / stop)',
-            svgIcon: startIcon,
-            onClick: onClick
-          }
+  await miro.initialize({
+    extensionPoints: {
+      bottomBar: async () => {
+        return {
+          title: 'Scrum balls (start / stop)',
+          svgIcon: startIcon,
+          onClick: onClick
         }
       }
-    });
+    }
   });
 
-  async function processSelectedAction(option: ActionType) {
+  const processSelectedAction = async (option: ActionType) => {
 
     // @ts-ignore
     const onlineUsers = await miro.board.getOnlineUsers();
@@ -94,4 +92,4 @@ const init = async () => {
   }
 }
 
-init();
+miro.onReady(init);

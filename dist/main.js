@@ -883,20 +883,18 @@ const init = async () => {
         }
         return;
     };
-    miro.onReady(async () => {
-        await miro.initialize({
-            extensionPoints: {
-                bottomBar: async () => {
-                    return {
-                        title: 'Scrum balls (start / stop)',
-                        svgIcon: startIcon,
-                        onClick: onClick
-                    };
-                }
+    await miro.initialize({
+        extensionPoints: {
+            bottomBar: async () => {
+                return {
+                    title: 'Scrum balls (start / stop)',
+                    svgIcon: startIcon,
+                    onClick: onClick
+                };
             }
-        });
+        }
     });
-    async function processSelectedAction(option) {
+    const processSelectedAction = async (option) => {
         // @ts-ignore
         const onlineUsers = await miro.board.getOnlineUsers();
         currentUserId = await miro.currentUser.getId();
@@ -919,9 +917,9 @@ const init = async () => {
         if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].resetGamePO) {
             await PO.resetScores();
         }
-    }
+    };
 };
-init();
+miro.onReady(init);
 
 
 /***/ })
