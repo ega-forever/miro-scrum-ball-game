@@ -57,4 +57,4 @@ const init = async () => {
 
 }
 
-init();
+miro.onReady(init);

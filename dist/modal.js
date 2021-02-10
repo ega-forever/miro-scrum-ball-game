@@ -889,7 +889,7 @@ const init = async () => {
         document.getElementById('join-game-user').style.display = 'inline-block';
     }
 };
-init();
+miro.onReady(init);
 
 
 /***/ })
