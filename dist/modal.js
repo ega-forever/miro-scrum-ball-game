@@ -870,7 +870,7 @@ window.onResetGameClick = async () => {
     await miro.board.ui.closeModal({ option: _static_actionType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].resetGamePO });
 };
 const init = async () => {
-    console.log(miro);
+    console.log(miro.currentUser);
     const currentUserId = await miro.currentUser.getId();
     const widgets = await miro.board.widgets.get();
     let PO = _models_POModel__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].get(widgets);
