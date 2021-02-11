@@ -38,7 +38,7 @@ export default class CommonUserModel {
 
     for (const widget of widgets) {
 
-      if (widget.metadata && widget.metadata[config.appId].formType === formType.bucket) {
+      if (widget.metadata && widget.metadata[config.appId] && widget.metadata[config.appId].formType === formType.bucket) {
         await this.checkBucketProportions(widget);
       }
 

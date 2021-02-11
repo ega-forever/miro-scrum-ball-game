@@ -475,7 +475,7 @@ class UserModel extends _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__[/* default
             await _BucketModel__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].resetBucketsPosition(0, 0, widgets);
         }
         for (const widget of widgets) {
-            if (widget.metadata && widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].appId].formType === _static_formType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].bucket) {
+            if (widget.metadata && widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].appId] && widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].appId].formType === _static_formType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].bucket) {
                 await this.checkBucketProportions(widget);
             }
             if (widget.metadata &&
@@ -804,7 +804,7 @@ class CommonUserModel {
             await _BucketModel__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].resetBucketsPosition(0, 0, widgets);
         }
         for (const widget of widgets) {
-            if (widget.metadata && widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].appId].formType === _static_formType__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].bucket) {
+            if (widget.metadata && widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].appId] && widget.metadata[_config_index__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].appId].formType === _static_formType__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].bucket) {
                 await this.checkBucketProportions(widget);
             }
             if (widget.metadata &&
