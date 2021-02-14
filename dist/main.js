@@ -877,7 +877,7 @@ const init = async () => {
             });
             return;
         }
-        const result = await miro.board.ui.openModal('modal.html', { width: 400, height: 175 });
+        const result = await miro.board.ui.openModal('modal.html', { width: 450, height: 200 });
         if (result) {
             await processSelectedAction(result.option);
         }

@@ -2,6 +2,7 @@ import POModel from './models/POModel';
 import UserModel from './models/UserModel';
 import config from './config/index';
 import ActionType from './static/actionType';
+import { getLocale } from './locales/index';
 
 //@ts-ignore
 window.onStartGameClick = async () => {
@@ -26,6 +27,35 @@ window.onEndGameClick = async () => {
 //@ts-ignore
 window.onResetGameClick = async () => {
   await miro.board.ui.closeModal({ option: ActionType.resetGamePO });
+}
+
+//@ts-ignore
+window.setLocale = (locale)=>{
+  document.getElementById('start-game-po').textContent = getLocale(locale).modal.startGamePO;
+  document.getElementById('reset-game-po').textContent = getLocale(locale).modal.resetGamePO;
+  document.getElementById('end-game-po').textContent = getLocale(locale).modal.endGamePO;
+  document.getElementById('join-game-user').textContent = getLocale(locale).modal.joinGameUser;
+  document.getElementById('leave-game-user').textContent = getLocale(locale).modal.leaveGameUser;
+  document.getElementById('description').textContent = getLocale(locale).modal.description;
+
+  const enLocaleButton = document.getElementById('locale-btn-en');
+  const ruLocaleButton = document.getElementById('locale-btn-ru');
+
+  if(locale.toLowerCase().includes('en')){
+    ruLocaleButton.classList.add('btn-secondary');
+    ruLocaleButton.classList.remove('btn-primary');
+
+    enLocaleButton.classList.remove('btn-secondary');
+    enLocaleButton.classList.add('btn-primary');
+  }
+
+  if(locale.toLowerCase().includes('ru')){
+    enLocaleButton.classList.add('btn-secondary');
+    enLocaleButton.classList.remove('btn-primary');
+
+    ruLocaleButton.classList.remove('btn-secondary');
+    ruLocaleButton.classList.add('btn-primary');
+  }
 }
 
 const init = async () => {
@@ -54,6 +84,10 @@ const init = async () => {
     document.getElementById('join-game-user').style.display = 'inline-block';
   }
 
+  const isCurrentLanguageSupported = !!(window.navigator.language.toLowerCase().includes('ru') || window.navigator.language.toLowerCase().includes('en'));
+
+  // @ts-ignore
+  window.setLocale(isCurrentLanguageSupported ? window.navigator.language : 'en');
 }
 
 miro.onReady(init);
