@@ -5,6 +5,6 @@ export default {
     endGamePO: 'End Game',
     joinGameUser: 'Join Game',
     leaveGameUser: 'Leave Game',
-    description: 'Super scrum ball game.'
+    description: 'You can check out game rules <a href="https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-en.md">here</a>'
   }
 }

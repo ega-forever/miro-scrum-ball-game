@@ -863,7 +863,7 @@ var actionType = __webpack_require__(7);
         endGamePO: 'End Game',
         joinGameUser: 'Join Game',
         leaveGameUser: 'Leave Game',
-        description: 'Super scrum ball game.'
+        description: 'You can check out game rules <a href="https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-en.md">here</a>'
     }
 });
 
@@ -875,7 +875,7 @@ var actionType = __webpack_require__(7);
         endGamePO: 'Закончить игру',
         joinGameUser: 'Присоединиться к игре',
         leaveGameUser: 'Покинуть игру',
-        description: 'Super scrum ball game.'
+        description: 'Посмотреть правила игры можно <a href="https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-ru.md">тут</a>'
     }
 });
 
@@ -922,8 +922,7 @@ window.setLocale = (locale) => {
     document.getElementById('end-game-po').textContent = getLocale(locale).modal.endGamePO;
     document.getElementById('join-game-user').textContent = getLocale(locale).modal.joinGameUser;
     document.getElementById('leave-game-user').textContent = getLocale(locale).modal.leaveGameUser;
-    document.getElementById('description').textContent = getLocale(locale).modal.description;
-    console.log(getLocale(locale).modal.description);
+    document.getElementById('description').innerHTML = getLocale(locale).modal.description;
     const enLocaleButton = document.getElementById('locale-btn-en');
     const ruLocaleButton = document.getElementById('locale-btn-ru');
     if (locale.toLowerCase().includes('en')) {
