@@ -4,9 +4,11 @@ import config from './config/index';
 import ActionType from './static/actionType';
 import { getLocale } from './locales/index';
 
+let globalLocale = null;
+
 //@ts-ignore
 window.onStartGameClick = async () => {
-  await miro.board.ui.closeModal({ option: ActionType.startNewGamePO });
+  await miro.board.ui.closeModal({ option: ActionType.startNewGamePO, locale: globalLocale });
 }
 
 //@ts-ignore
@@ -30,7 +32,8 @@ window.onResetGameClick = async () => {
 }
 
 //@ts-ignore
-window.setLocale = (locale)=>{
+window.setLocale = (locale) => {
+  globalLocale = locale;
   document.getElementById('start-game-po').textContent = getLocale(locale).modal.startGamePO;
   document.getElementById('reset-game-po').textContent = getLocale(locale).modal.resetGamePO;
   document.getElementById('end-game-po').textContent = getLocale(locale).modal.endGamePO;
@@ -41,7 +44,7 @@ window.setLocale = (locale)=>{
   const enLocaleButton = document.getElementById('locale-btn-en');
   const ruLocaleButton = document.getElementById('locale-btn-ru');
 
-  if(locale.toLowerCase().includes('en')){
+  if (locale.toLowerCase().includes('en')) {
     ruLocaleButton.classList.add('btn-secondary');
     ruLocaleButton.classList.remove('btn-primary');
 
@@ -49,7 +52,7 @@ window.setLocale = (locale)=>{
     enLocaleButton.classList.add('btn-primary');
   }
 
-  if(locale.toLowerCase().includes('ru')){
+  if (locale.toLowerCase().includes('ru')) {
     enLocaleButton.classList.add('btn-secondary');
     enLocaleButton.classList.remove('btn-primary');
 

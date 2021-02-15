@@ -40,9 +40,9 @@ const init = async () => {
       return;
     }
 
-    const result: { option: ActionType } = await miro.board.ui.openModal('modal.html', {width: 450, height: 200});
+    const result: { option: ActionType, locale: string } = await miro.board.ui.openModal('modal.html', {width: 450, height: 200});
     if (result) {
-      await processSelectedAction(result.option);
+      await processSelectedAction(result.option, result.locale);
     }
     return
   }
@@ -51,7 +51,7 @@ const init = async () => {
     extensionPoints: {
       bottomBar: async () => {
         return {
-          title: 'Scrum balls (start / stop)',
+          title: 'Scrum balls',
           svgIcon: startIcon,
           onClick: onClick
         }
@@ -59,7 +59,7 @@ const init = async () => {
     }
   });
 
-  const processSelectedAction = async (option: ActionType) => {
+  const processSelectedAction = async (option: ActionType, locale: string) => {
 
     // @ts-ignore
     const onlineUsers = await miro.board.getOnlineUsers();
@@ -68,7 +68,7 @@ const init = async () => {
     widgets = await miro.board.widgets.get();
 
     if (option === ActionType.startNewGamePO) {
-      PO = await POModel.create(currentUserId, currentUsername, 0 - config.bucket.widthHeight - 100, 0, widgets);
+      PO = await POModel.create(currentUserId, currentUsername, 0 - config.bucket.widthHeight - 100, 0, widgets, locale);
       PO.addCanvasListener()
     }
 

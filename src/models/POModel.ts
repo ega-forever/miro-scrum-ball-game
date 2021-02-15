@@ -11,6 +11,7 @@ import BallModel from './BallModel';
 import UserModel from './UserModel';
 import CommonUserModel from './CommonUserModel';
 import FormType from '../static/formType';
+import { getLocale } from '../locales/index';
 
 export default class POModel extends CommonUserModel {
 
@@ -21,7 +22,7 @@ export default class POModel extends CommonUserModel {
     this.widget = widget;
   }
 
-  public static async create(userId, username, x, y, widgets: IWidget[]): Promise<POModel> {
+  public static async create(userId, username, x, y, widgets: IWidget[], locale: string): Promise<POModel> {
 
     const buckets = [
       {
@@ -58,7 +59,7 @@ export default class POModel extends CommonUserModel {
 
     const [widget] = await miro.board.widgets.create({
       type: 'card',
-      title: `game PO: ${ username }`,
+      title: `${getLocale(locale).cards.poCard}: ${ username }`,
       x: x - config.bucket.widthHeight - 100,
       y: y + config.card.height + config.card.height / 2,
       metadata: {

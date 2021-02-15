@@ -5,6 +5,9 @@ export default {
     endGamePO: 'End Game',
     joinGameUser: 'Join Game',
     leaveGameUser: 'Leave Game',
-    description: 'You can check out game rules <a href="https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-en.md">here</a>'
+    description: 'You can check out game rules <a href="#" onclick="window.open(`https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-en.md`, `_blank`)">here</a>'
+  },
+  cards: {
+    poCard: 'Game PO'
   }
 }

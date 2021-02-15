@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -400,8 +400,8 @@ var FormType;
 /* harmony import */ var _static_bucketType__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(1);
 /* harmony import */ var _BucketModel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(2);
 /* harmony import */ var _BallModel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(3);
-/* harmony import */ var _POModel__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(8);
-/* harmony import */ var _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(9);
+/* harmony import */ var _POModel__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(9);
+/* harmony import */ var _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(10);
 
 
 
@@ -584,6 +584,56 @@ var ActionType;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ getLocale; });
+
+// CONCATENATED MODULE: ./src/locales/en.ts
+/* harmony default export */ var en = ({
+    modal: {
+        startGamePO: 'Start game as PO',
+        resetGamePO: 'Reset Scores',
+        endGamePO: 'End Game',
+        joinGameUser: 'Join Game',
+        leaveGameUser: 'Leave Game',
+        description: 'You can check out game rules <a href="#" onclick="window.open(`https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-en.md`, `_blank`)">here</a>'
+    },
+    cards: {
+        poCard: 'Game PO'
+    }
+});
+
+// CONCATENATED MODULE: ./src/locales/ru.ts
+/* harmony default export */ var ru = ({
+    modal: {
+        startGamePO: 'Начать игру как ВП',
+        resetGamePO: 'Сбросить очки',
+        endGamePO: 'Закончить игру',
+        joinGameUser: 'Присоединиться к игре',
+        leaveGameUser: 'Покинуть игру',
+        description: 'Посмотреть правила игры можно <a href="#" onclick="window.open(`https://github.com/ega-forever/miro-scrum-ball-game/blob/master/rules-ru.md`, `_blank`)">тут</a>'
+    },
+    cards: {
+        poCard: 'ВП'
+    }
+});
+
+// CONCATENATED MODULE: ./src/locales/index.ts
+
+
+const getLocale = (locale) => {
+    if (locale.toLowerCase().includes('ru')) {
+        return ru;
+    }
+    return en;
+};
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return POModel; });
 /* harmony import */ var _static_formType__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var _static_colors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5);
@@ -592,7 +642,9 @@ var ActionType;
 /* harmony import */ var _config_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(0);
 /* harmony import */ var _BallModel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(3);
 /* harmony import */ var _UserModel__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(6);
-/* harmony import */ var _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(9);
+/* harmony import */ var _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(10);
+/* harmony import */ var _locales_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(8);
+
 
 
 
@@ -608,7 +660,7 @@ class POModel extends _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__[/* default *
         super();
         this.widget = widget;
     }
-    static async create(userId, username, x, y, widgets) {
+    static async create(userId, username, x, y, widgets, locale) {
         const buckets = [
             {
                 type: _static_bucketType__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].source,
@@ -642,7 +694,7 @@ class POModel extends _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__[/* default *
         }
         const [widget] = await miro.board.widgets.create({
             type: 'card',
-            title: `game PO: ${username}`,
+            title: `${Object(_locales_index__WEBPACK_IMPORTED_MODULE_8__[/* getLocale */ "a"])(locale).cards.poCard}: ${username}`,
             x: x - _config_index__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].bucket.widthHeight - 100,
             y: y + _config_index__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].card.height + _config_index__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"].card.height / 2,
             metadata: {
@@ -769,7 +821,7 @@ class POModel extends _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__[/* default *
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -835,13 +887,13 @@ class CommonUserModel {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _static_actionType__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
-/* harmony import */ var _models_POModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
+/* harmony import */ var _models_POModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /* harmony import */ var _models_UserModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(6);
 /* harmony import */ var _config_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(0);
 
@@ -879,7 +931,7 @@ const init = async () => {
         }
         const result = await miro.board.ui.openModal('modal.html', { width: 450, height: 200 });
         if (result) {
-            await processSelectedAction(result.option);
+            await processSelectedAction(result.option, result.locale);
         }
         return;
     };
@@ -887,21 +939,21 @@ const init = async () => {
         extensionPoints: {
             bottomBar: async () => {
                 return {
-                    title: 'Scrum balls (start / stop)',
+                    title: 'Scrum balls',
                     svgIcon: startIcon,
                     onClick: onClick
                 };
             }
         }
     });
-    const processSelectedAction = async (option) => {
+    const processSelectedAction = async (option, locale) => {
         // @ts-ignore
         const onlineUsers = await miro.board.getOnlineUsers();
         currentUserId = await miro.currentUser.getId();
         const currentUsername = onlineUsers.find(u => u.id === currentUserId).name;
         widgets = await miro.board.widgets.get();
         if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].startNewGamePO) {
-            PO = await _models_POModel__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].create(currentUserId, currentUsername, 0 - _config_index__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].bucket.widthHeight - 100, 0, widgets);
+            PO = await _models_POModel__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].create(currentUserId, currentUsername, 0 - _config_index__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].bucket.widthHeight - 100, 0, widgets, locale);
             PO.addCanvasListener();
         }
         if (option === _static_actionType__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].leaveGameUser) {
