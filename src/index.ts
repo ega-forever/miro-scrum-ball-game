@@ -36,8 +36,7 @@ const init = async () => {
     if (!isAuthorized) {
       await miro.authorize({
         response_type: 'token',
-        // redirect_uri: 'https://ega-forever.github.io/miro-scrum-ball-game/auth-success.html', todo
-        redirect_uri: 'https://d26ba36540f4.ngrok.io/auth-success.html',
+        redirect_uri: 'https://ega-forever.github.io/miro-scrum-ball-game/auth-success.html',
         state: JSON.stringify({ board: `https://miro.com/app/board/${ boardInfo.id }/` })
       });
       return;
