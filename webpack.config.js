@@ -3,7 +3,8 @@ const path = require('path');
 module.exports = {
   entry: {
     main: './src/index.ts',
-    modal: './src/modal.ts'
+    modal: './src/modal.ts',
+    success: './src/success.ts'
   },
   module: {
     rules: [
