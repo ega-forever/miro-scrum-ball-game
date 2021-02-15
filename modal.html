@@ -6,41 +6,75 @@
     <script type="text/javascript" src="https://miro.com/app/static/sdk.1.1.js"></script>
     <script type="text/javascript" src="dist/modal.js"></script>
 </head>
-<body class="h-100 text-center text-white bg-dark">
+<body class="h-100">
 
 
-<ul class="nav justify-content-end">
+<!--<ul class="nav justify-content-end">
     <li class="nav-item">
         <div class="btn-group btn-group-sm align-content-end" role="group">
             <a href="#" type="button" class="btn btn-primary" id="locale-btn-en" onclick="setLocale('en')">En</a>
             <a href="#" type="button" class="btn btn-secondary" id="locale-btn-ru" onclick="setLocale('ru')">Ru</a>
         </div>
     </li>
-</ul>
+</ul>-->
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-    <main class="px-3">
-        <h1>Scrum balls game</h1>
-        <p class="lead" id="description"></p>
-        <p class="lead">
-            <button class="btn btn-lg btn-secondary fw-bold" id="start-game-po" style="display: none"
-                    onclick="onStartGameClick()">Start game as PO
-            </button>
-            <button class="btn btn-lg btn-secondary fw-bold" id="reset-game-po" style="display: none"
-                    onclick="onResetGameClick()">Reset Scores
-            </button>
-            <button class="btn btn-lg btn-secondary fw-bold" id="end-game-po" style="display: none"
-                    onclick="onEndGameClick()">End Game
-            </button>
-            <button class="btn btn-lg btn-secondary fw-bold" id="join-game-user" style="display: none"
-                    onclick="onUserJoinGameClick()">Join Game
-            </button>
-            <button class="btn btn-lg btn-secondary fw-bold" id="leave-game-user" style="display: none"
-                    onclick="onUserLeaveGameClick()">Leave Game
-            </button>
-        </p>
-    </main>
+<div class="card border-0">
+    <div class="card-body">
+        <div class="d-flex">
+            <h5 class="card-title flex-grow-1" id="name"></h5>
+            <ul class="nav justify-content-end">
+                <li class="nav-item">
+                    <div class="btn-group btn-group-sm align-content-end" role="group">
+                        <a href="#" type="button" class="btn btn-primary" id="locale-btn-en" onclick="setLocale('en')">En</a>
+                        <a href="#" type="button" class="btn btn-secondary" id="locale-btn-ru" onclick="setLocale('ru')">Ru</a>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+        <p class="card-text" id="description"></p>
+        <button class="card-link btn btn-primary fw-bold" id="start-game-po" style="display: none"
+                onclick="onStartGameClick()">Start game as PO
+        </button>
+        <button class="card-link btn btn-primary fw-bold" id="reset-game-po" style="display: none"
+                onclick="onResetGameClick()">Reset Scores
+        </button>
+        <button class="card-link btn btn-primary fw-bold" id="end-game-po" style="display: none"
+                onclick="onEndGameClick()">End Game
+        </button>
+        <button class="card-link btn btn-primary fw-bold" id="join-game-user" style="display: none"
+                onclick="onUserJoinGameClick()">Join Game
+        </button>
+        <button class="card-link btn btn-primary fw-bold" id="leave-game-user" style="display: none"
+                onclick="onUserLeaveGameClick()">Leave Game
+        </button>
+    </div>
 </div>
+
+
+<!--
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <h1>Scrum balls game</h1>
+    <p class="lead" id="description"></p>
+    <p class="lead">
+        <button class="btn btn-lg btn-primary fw-bold" id="start-game-po" style="display: none"
+                onclick="onStartGameClick()">Start game as PO
+        </button>
+        <button class="btn btn-lg btn-primary fw-bold" id="reset-game-po" style="display: none"
+                onclick="onResetGameClick()">Reset Scores
+        </button>
+        <button class="btn btn-lg btn-primary fw-bold" id="end-game-po" style="display: none"
+                onclick="onEndGameClick()">End Game
+        </button>
+        <button class="btn btn-lg btn-primary fw-bold" id="join-game-user" style="display: none"
+                onclick="onUserJoinGameClick()">Join Game
+        </button>
+        <button class="btn btn-lg btn-primary fw-bold" id="leave-game-user" style="display: none"
+                onclick="onUserLeaveGameClick()">Leave Game
+        </button>
+    </p>
+</div>
+-->
 
 
 </body>

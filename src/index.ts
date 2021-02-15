@@ -45,7 +45,7 @@ const init = async () => {
 
     const result: { option: ActionType, locale: string } = await miro.board.ui.openModal('modal.html', {
       width: 450,
-      height: 200
+      height: 150
     });
     if (result) {
       await processSelectedAction(result.option, result.locale);

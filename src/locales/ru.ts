@@ -1,7 +1,8 @@
 export default {
   modal: {
+    name: "Волшебные шары",
     startGamePO: 'Начать игру как ВП',
-    resetGamePO: 'Сбросить очки',
+    resetGamePO: 'обнулить счетчики',
     endGamePO: 'Закончить игру',
     joinGameUser: 'Присоединиться к игре',
     leaveGameUser: 'Покинуть игру',

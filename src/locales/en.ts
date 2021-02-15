@@ -1,5 +1,6 @@
 export default {
   modal: {
+    name: "Scrum balls game",
     startGamePO: 'Start game as PO',
     resetGamePO: 'Reset Scores',
     endGamePO: 'End Game',

@@ -568,22 +568,6 @@ class UserModel extends _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__[/* default
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var ActionType;
-(function (ActionType) {
-    ActionType[ActionType["startNewGamePO"] = 1] = "startNewGamePO";
-    ActionType[ActionType["leaveGameUser"] = 2] = "leaveGameUser";
-    ActionType[ActionType["joinGameUser"] = 3] = "joinGameUser";
-    ActionType[ActionType["endGamePO"] = 4] = "endGamePO";
-    ActionType[ActionType["resetGamePO"] = 5] = "resetGamePO";
-})(ActionType || (ActionType = {}));
-/* harmony default export */ __webpack_exports__["a"] = (ActionType);
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ getLocale; });
@@ -591,6 +575,7 @@ __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding *
 // CONCATENATED MODULE: ./src/locales/en.ts
 /* harmony default export */ var en = ({
     modal: {
+        name: "Scrum balls game",
         startGamePO: 'Start game as PO',
         resetGamePO: 'Reset Scores',
         endGamePO: 'End Game',
@@ -606,8 +591,9 @@ __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding *
 // CONCATENATED MODULE: ./src/locales/ru.ts
 /* harmony default export */ var ru = ({
     modal: {
+        name: "Волшебные шары",
         startGamePO: 'Начать игру как ВП',
-        resetGamePO: 'Сбросить очки',
+        resetGamePO: 'обнулить счетчики',
         endGamePO: 'Закончить игру',
         joinGameUser: 'Присоединиться к игре',
         leaveGameUser: 'Покинуть игру',
@@ -630,6 +616,22 @@ const getLocale = (locale) => {
 
 
 /***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var ActionType;
+(function (ActionType) {
+    ActionType[ActionType["startNewGamePO"] = 1] = "startNewGamePO";
+    ActionType[ActionType["leaveGameUser"] = 2] = "leaveGameUser";
+    ActionType[ActionType["joinGameUser"] = 3] = "joinGameUser";
+    ActionType[ActionType["endGamePO"] = 4] = "endGamePO";
+    ActionType[ActionType["resetGamePO"] = 5] = "resetGamePO";
+})(ActionType || (ActionType = {}));
+/* harmony default export */ __webpack_exports__["a"] = (ActionType);
+
+
+/***/ }),
 /* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -643,7 +645,7 @@ const getLocale = (locale) => {
 /* harmony import */ var _BallModel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(3);
 /* harmony import */ var _UserModel__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(6);
 /* harmony import */ var _CommonUserModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(10);
-/* harmony import */ var _locales_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(8);
+/* harmony import */ var _locales_index__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(7);
 
 
 
@@ -892,7 +894,7 @@ class CommonUserModel {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _static_actionType__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
+/* harmony import */ var _static_actionType__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8);
 /* harmony import */ var _models_POModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /* harmony import */ var _models_UserModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(6);
 /* harmony import */ var _config_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(0);
@@ -934,7 +936,7 @@ const init = async () => {
         }
         const result = await miro.board.ui.openModal('modal.html', {
             width: 450,
-            height: 200
+            height: 150
         });
         if (result) {
             await processSelectedAction(result.option, result.locale);

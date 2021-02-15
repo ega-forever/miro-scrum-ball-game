@@ -40,6 +40,7 @@ window.setLocale = (locale) => {
   document.getElementById('join-game-user').textContent = getLocale(locale).modal.joinGameUser;
   document.getElementById('leave-game-user').textContent = getLocale(locale).modal.leaveGameUser;
   document.getElementById('description').innerHTML = getLocale(locale).modal.description;
+  document.getElementById('name').innerHTML = getLocale(locale).modal.name;
 
   const enLocaleButton = document.getElementById('locale-btn-en');
   const ruLocaleButton = document.getElementById('locale-btn-ru');
