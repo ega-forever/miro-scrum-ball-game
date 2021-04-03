@@ -10,7 +10,7 @@ All 3 roles are the same as in original scrum guide. The first user, who starts 
 rest (who join the game) - are developer team members.
 
 ## How to start the game
-To run game, click on darts icon (in bottom bar). The popup window should appear. To start the game click "start game as PO".
+To run game, click on ![icon](./assets/icon_16_16.svg) button (in bottom bar). The popup window should appear. To start the game click "start game as PO".
 The first user, who starts the game - becomes PO.
 
 The game should create 3 buckets:
@@ -38,7 +38,7 @@ There are 3 roles: developer, PO (product owner) and scrum master
 3) ask the team (PO + developers) to put as much balls as they can into the target bucket in 2 minutes
 4) after 2 minutes - scrum master should stop the team and timer, check how many balls reached the target bucket and draw bucket, make retrospective
 5) fix the results in table (for instance in excel)
-5) click on darts button again, then "reset scores"
+5) click on ![icon](./assets/icon_16_16.svg) button again, then "reset scores"
 6) start the game again. It's okey to have 3-5 rounds
 7) After each round make retrospective. The team should adopt over time, and scores result should increase
 
