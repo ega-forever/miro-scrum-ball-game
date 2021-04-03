@@ -1,5 +1,5 @@
 export default {
-  appId: '3074457352753106105',
+  appId: '<app_id>',
   balls: {
     initialAmount: 2,
     radius: 50

@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "lint": "tslint --fix --project tsconfig.json",
-    "build": "webpack"
+    "build": "webpack --env ENVIRONMENT=prod",
+    "build_dev": "webpack --env ENVIRONMENT=dev"
   },
   "keywords": [
     "scrum",
@@ -17,6 +18,7 @@
   "dependencies": {},
   "devDependencies": {
     "miro": "https://github.com/miroapp/app-examples.git",
+    "string-replace-loader": "^3.0.1",
     "ts-loader": "^5.4.5",
     "ts-node": "^8.4.1",
     "tslint": "^5.15.0",

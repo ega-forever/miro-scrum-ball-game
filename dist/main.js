@@ -1,6 +1,44 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ 323:
+/***/ ((module) => {
+
+module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" x=\"0px\" y=\"0px\" viewBox=\"0 0 100 100\" enable-background=\"new 0 0 100 100\" xml:space=\"preserve\" fill-rule=\"evenodd\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M39.769,12.172l-8.809-1.717l0.945,2.75C16.64,19.761,5.918,34.932,5.918,52.57c0,5.741,1.156,11.212,3.215,16.22  c-1.399,1.219-2.29,3.008-2.29,5.005c0,3.661,2.979,6.64,6.639,6.64s6.639-2.979,6.639-6.64s-2.979-6.64-6.639-6.64  c-0.584,0-1.148,0.083-1.688,0.226c-1.845-4.582-2.876-9.575-2.876-14.811c0-16.325,9.878-30.374,23.966-36.517l0.993,2.89  L39.769,12.172z M17.122,73.795c0,2.007-1.632,3.64-3.639,3.64s-3.639-1.633-3.639-3.64s1.632-3.64,3.639-3.64  S17.122,71.788,17.122,73.795z M91.111,58.763c0.299-2.023,0.473-4.087,0.473-6.192c0-21.387-15.761-39.148-36.275-42.315  c-0.478-3.196-3.232-5.657-6.558-5.657c-3.661,0-6.639,2.979-6.639,6.64s2.979,6.64,6.639,6.64c2.96,0,5.472-1.948,6.326-4.629  c18.967,3.04,33.507,19.512,33.507,39.323c0,1.875-0.149,3.713-0.404,5.518l-2.846-0.654l2.632,8.581l6.116-6.568L91.111,58.763z   M48.751,14.877c-2.007,0-3.639-1.633-3.639-3.64s1.632-3.64,3.639-3.64s3.639,1.633,3.639,3.64S50.758,14.877,48.751,14.877z   M84.021,67.155c-3.661,0-6.64,2.979-6.64,6.64c0,1.729,0.67,3.302,1.758,4.484c-7.312,8.63-18.217,14.124-30.388,14.124  c-8.825,0-16.98-2.896-23.589-7.772l1.963-2.234l-8.801-1.76l2.878,8.502l1.976-2.249c7.142,5.338,15.99,8.514,25.573,8.514  c13.196,0,25.001-6.013,32.864-15.427c0.747,0.292,1.557,0.458,2.405,0.458c3.66,0,6.639-2.979,6.639-6.64  S87.681,67.155,84.021,67.155z M84.021,77.435c-2.007,0-3.64-1.633-3.64-3.64s1.633-3.64,3.64-3.64s3.639,1.633,3.639,3.64  S86.027,77.435,84.021,77.435z\"/></svg>\n";
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
 
 ;// CONCATENATED MODULE: ./src/static/actionType.ts
 var ActionType;
@@ -713,13 +751,16 @@ class POModel extends CommonUserModel {
     }
 }
 
+// EXTERNAL MODULE: ./assets/icon_28_28.svg
+var icon_28_28 = __webpack_require__(323);
 ;// CONCATENATED MODULE: ./src/index.ts
 
 
 
 
+// @ts-ignore
+
 const init = async () => {
-    const startIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><title>BUSINESS</title><g id="scrum_ball_game" data-name="02.TARGET"><path d="M25.06,9.76a11,11,0,1,1-2.82-2.82l1.43-1.43a13,13,0,1,0,2.82,2.82Z"/><path d="M20.06,9.12A7.9,7.9,0,0,0,16,8a8,8,0,1,0,8,8,7.9,7.9,0,0,0-1.12-4.06l-1.47,1.47A5.9,5.9,0,0,1,22,16a6,6,0,1,1-6-6,5.9,5.9,0,0,1,2.59.59Z"/><circle cx="16" cy="16" r="2"/><path d="M28.78,3.22V.78L26.59,3l-.44,1.77a1,1,0,0,0-.58.27l-7.77,7.77a1,1,0,1,0,1.41,1.41L27,6.43a1,1,0,0,0,.27-.58L29,5.41l2.2-2.2Z"/></g></svg>`;
     let currentUserId;
     let widgets;
     let PO;
@@ -763,7 +804,7 @@ const init = async () => {
             bottomBar: async () => {
                 return {
                     title: 'Scrum balls',
-                    svgIcon: startIcon,
+                    svgIcon: icon_28_28,
                     onClick: onClick
                 };
             }
@@ -795,6 +836,8 @@ const init = async () => {
     };
 };
 miro.onReady(init);
+
+})();
 
 /******/ })()
 ;
