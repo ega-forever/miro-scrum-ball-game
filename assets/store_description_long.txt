@@ -1,0 +1,5 @@
+The Magic Scrum balls Game is a great opportunity to introduce people to basic scrum principles and values in a fun and all-senses involving way.
+It simulates a scrum production process and based on the following principles: plan-perform-adapt.
+The team will self-organize and form a process based on the rules provided.
+The objective is to pass as many balls as possible in the given timeboxes through the team by following certain rules.
+Dropped balls reduce as "defects" the final result.
