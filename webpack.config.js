@@ -11,8 +11,7 @@ module.exports = (env)=> {
   return {
     entry: {
       main: './src/index.ts',
-      modal: './src/modal.ts',
-      success: './src/success.ts'
+      modal: './src/modal.ts'
     },
     module: {
       rules: [
