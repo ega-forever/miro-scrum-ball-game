@@ -11,7 +11,7 @@ Game features
 
 ## Installation
 For installing scrum ball game as web plugin, please use this url:
-```https://miro.com/oauth/authorize/?response_type=code&client_id=3074457352753106105&redirect_uri=https%3A%2F%2Fega-forever.github.io%2Fmiro-scrum-ball-game%2Fauth-success.html```
+```https://miro.com/oauth/authorize/?response_type=code&client_id=3074457352753106105&redirect_uri=/confirm-app-install/```
 
 ## Rules
 

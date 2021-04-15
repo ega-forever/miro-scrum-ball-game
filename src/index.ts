@@ -31,15 +31,9 @@ const init = async () => {
 
   const onClick = async () => {
     const isAuthorized = await miro.isAuthorized();
-    const boardInfo = await miro.board.info.get();
 
     if (!isAuthorized) {
-      await miro.authorize({
-        response_type: 'token',
-        redirect_uri: 'https://ega-forever.github.io/miro-scrum-ball-game/auth-success.html',
-        state: JSON.stringify({ board: `https://miro.com/app/board/${ boardInfo.id }/` })
-      });
-      return;
+      await miro.requestAuthorization();
     }
 
     const result: { option: ActionType, locale: string } = await miro.board.ui.openModal('modal.html', {
