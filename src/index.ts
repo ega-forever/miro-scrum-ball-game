@@ -33,6 +33,7 @@ const init = async () => {
     const isAuthorized = await miro.isAuthorized();
 
     if (!isAuthorized) {
+      //@ts-ignore
       await miro.requestAuthorization();
     }
 
@@ -48,10 +49,11 @@ const init = async () => {
 
   await miro.initialize({
     extensionPoints: {
-      bottomBar: async () => {
+      toolbar: async () => {
         return {
           title: 'Scrum balls',
-          svgIcon: icon,
+          librarySvgIcon: icon,
+          toolbarSvgIcon: icon,
           onClick: onClick
         }
       }

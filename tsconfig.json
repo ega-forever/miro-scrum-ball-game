@@ -13,5 +13,9 @@
         "esModuleInterop": true,
         "lib": ["DOM", "ES6", "ScriptHost"]
     },
-    "include": ["src/**/*", "node_modules/miro/miro.d.ts"]
+    "include": [
+      "src/**/*",
+      "node_modules/miro/miro.d.ts",
+      "node_modules/miro/miro.d.ts"
+    ]
 }

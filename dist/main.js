@@ -782,6 +782,7 @@ const init = async () => {
     const onClick = async () => {
         const isAuthorized = await miro.isAuthorized();
         if (!isAuthorized) {
+            //@ts-ignore
             await miro.requestAuthorization();
         }
         const result = await miro.board.ui.openModal('modal.html', {
@@ -795,10 +796,11 @@ const init = async () => {
     };
     await miro.initialize({
         extensionPoints: {
-            bottomBar: async () => {
+            toolbar: async () => {
                 return {
                     title: 'Scrum balls',
-                    svgIcon: icon_28_28,
+                    librarySvgIcon: icon_28_28,
+                    toolbarSvgIcon: icon_28_28,
                     onClick: onClick
                 };
             }
