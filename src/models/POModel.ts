@@ -122,12 +122,14 @@ export default class POModel extends CommonUserModel {
     const ballMeta = BallModel.getMeta(ball);
 
     const userCardWithBall = BallModel.userCardWithBall(ball, widgets);
-    const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets);
-    const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets);
+    const drawBucket = BucketModel.get(BucketType.draw, widgets);
+    // const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets); //todo uncomment once meta will work
+    // const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets);
+    const targetBucket = BucketModel.get(BucketType.target, widgets); // todo uncomment once meta will work
 
     if (userCardWithBall && ball.lastModifiedUserId !== userId) {
       BallModel.destroy(ball);
-      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+      BucketModel.updateBallsCount(BucketType.draw, widgets, parseInt(drawBucket.text) + 1)
       return
     }
 
@@ -137,26 +139,18 @@ export default class POModel extends CommonUserModel {
     if (isInTargetBucket && usersWidgets.length + 1 > ballMeta.participatedUserIds.length) {
       console.log('not all peers touched balls');
       BallModel.destroy(ball);
-      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+      BucketModel.updateBallsCount(BucketType.draw, widgets, parseInt(drawBucket.text) + 1)
       return;
     }
 
     if (isInTargetBucket && usersWidgets.length === ballMeta.participatedUserIds.length) {
       console.log('move ball to target');
       BallModel.destroy(ball);
-      BucketModel.updateBallsCount(BucketType.target, widgets, targetBucketMeta.ballsCount + 1)
+      BucketModel.updateBallsCount(BucketType.target, widgets, parseInt(targetBucket.text) + 1)
       return;
     }
 
     const isInSourceBucket = BucketModel.isBallInBucket(BucketType.source, ball, widgets);
-    /*    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
-
-        if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
-          ballMeta.bucketType = BucketType.draw;
-          BallModel.destroy(ball);
-          BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
-          return;
-        }*/
 
     if (userCardWithBall) {
 
@@ -166,7 +160,7 @@ export default class POModel extends CommonUserModel {
         allUserBallsCount > config.rules.memberBallLimit) {
         console.log('user reached limit in balls. Moving to draw bucket')
         BallModel.destroy(ball);
-        BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+        BucketModel.updateBallsCount(BucketType.draw, widgets, parseInt(drawBucket.text) + 1)
         return;
       }
 
@@ -181,7 +175,7 @@ export default class POModel extends CommonUserModel {
     if (!userCardWithBall && !isInSourceBucket && !isInTargetBucket) {
       console.log('outside of all cards');
       BallModel.destroy(ball);
-      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+      BucketModel.updateBallsCount(BucketType.draw, widgets, parseInt(drawBucket.text) + 1)
       return;
     }
 
@@ -190,12 +184,13 @@ export default class POModel extends CommonUserModel {
 
   protected async checkWrongMovedBallPosition(ball: IShapeWidget, widgets: IWidget[]) {
     const userCardWithBall = BallModel.userCardWithBall(ball, widgets);
-    const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets);
+    // const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets); //todo uncomment
+    const drawBucket = BucketModel.get(BucketType.draw, widgets);
 
     if (!userCardWithBall || userCardWithBall.metadata[config.appId].owner !== ball.metadata[config.appId].owner) {
       console.log('out of user card!!')
       BallModel.destroy(ball as any);
-      BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
+      BucketModel.updateBallsCount(BucketType.draw, widgets, parseInt(drawBucket.text) + 1)
     }
   }
 

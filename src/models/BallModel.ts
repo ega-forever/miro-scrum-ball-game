@@ -78,29 +78,28 @@ export default class BallModel {
   }
 
 
-    public static getBucketBalls(bucketType: BucketType, widgets: IWidget[]): IShapeWidget[] {
-      return widgets.filter(w =>
-        w.metadata[config.appId] &&
-        w.metadata[config.appId].formType === formType.ball &&
-        w.metadata[config.appId].bucketType === bucketType
-      ) as any;
-    }
+  public static getBucketBalls(bucketType: BucketType, widgets: IWidget[]): IShapeWidget[] {
+    return widgets.filter(w =>
+      w.metadata[config.appId] &&
+      w.metadata[config.appId].formType === formType.ball &&
+      w.metadata[config.appId].bucketType === bucketType
+    ) as any;
+  }
 
   public static async updateMeta(ball: IShapeWidget, ballMeta: Meta): Promise<void> {
 
     Object.assign(ball, {
       metadata: {
         [config.appId]: ballMeta
-      }
-    });
-
-    await miro.board.widgets.update({
-      id: ball.id,
-      metadata: {
-        [config.appId]: ballMeta
       },
       text: (ballMeta.participatedUserIds.length - 1).toString()
     });
+
+
+    await miro.board.widgets.deleteById(ball.id);
+    const [created] = await miro.board.widgets.create(ball);
+    // @ts-ignore
+    ball.id = created.id;
   }
 
   public static async moveToBucket(bucketType: BucketType, ball: IShapeWidget, widgets: IWidget[]): Promise<void> {

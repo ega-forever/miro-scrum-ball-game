@@ -349,7 +349,6 @@ class UserModel extends CommonUserModel {
                     continue;
                 }
                 if (widget.metadata[config.appId].owner !== userId && widget.lastModifiedUserId === userId) {
-                    console.log('super user owner', widget.metadata[config.appId].owner, widget.lastModifiedUserId);
                     await this.checkWrongMovedBallPosition(widget, widgets);
                 }
             }
@@ -359,20 +358,19 @@ class UserModel extends CommonUserModel {
         const ballMeta = BallModel.getMeta(ball);
         const userCardWithBall = BallModel.userCardWithBall(ball, widgets);
         const allUserBallsCount = BallModel.getUserBallsAmount(userCardWithBall, widgets);
-        const drawBucketMeta = BucketModel.getMeta(bucketType.draw, widgets);
-        if (userCardWithBall &&
-            this.widget.metadata[config.appId].owner === userCardWithBall.metadata[config.appId].owner &&
-            allUserBallsCount > config.rules.memberBallLimit) {
+        // const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets); //todo uncomment once meta will work
+        const drawBucket = BucketModel.get(bucketType.draw, widgets);
+        if (userCardWithBall && allUserBallsCount > config.rules.memberBallLimit) {
             console.log('user reached limit in balls. Moving to draw bucket');
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
             return;
         }
         if (userCardWithBall && userId !== userCardWithBall.metadata[config.appId].owner) {
             if (ball.lastModifiedUserId !== userId) {
                 console.log('wrong user touched ball');
                 BallModel.destroy(ball);
-                BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+                BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
                 return;
             }
             if (ballMeta.participatedUserIds.indexOf(userCardWithBall.metadata[config.appId].owner) === -1) {
@@ -384,23 +382,24 @@ class UserModel extends CommonUserModel {
             return;
         }
         const usersWidgets = UserModel.getAllCreatedUsers(widgets);
-        const targetBucketMeta = BucketModel.getMeta(bucketType.target, widgets);
+        // const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets); //todo uncomment once meta will work
+        const targetBucket = BucketModel.get(bucketType.target, widgets);
         const isInTargetBucket = BucketModel.isBallInBucket(bucketType.target, ball, widgets);
         if (isInTargetBucket) {
             if (usersWidgets.length + 1 > ballMeta.participatedUserIds.length) {
                 console.log('not all peers touched balls', usersWidgets.length, ballMeta.participatedUserIds);
                 BallModel.destroy(ball);
-                BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+                BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
                 return;
             }
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.target, widgets, targetBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.target, widgets, parseInt(targetBucket.text) + 1);
             return;
         }
         if (!userCardWithBall && !isInTargetBucket) {
             console.log('outside of all valid cards');
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
             return;
         }
     }
@@ -411,11 +410,11 @@ class UserModel extends CommonUserModel {
             BallModel.moveToBucket(bucketType.source, ball, widgets);
             return;
         }
-        const drawBucketMeta = BucketModel.getMeta(bucketType.draw, widgets);
-        console.log('wrong user 123');
+        // const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets); // todo uncomment once meta will work
+        const drawBucket = BucketModel.get(bucketType.draw, widgets);
         // todo check
         BallModel.destroy(ball);
-        BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+        BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
     }
     async stopTrack() {
         await miro.board.widgets.deleteById(this.widget.id);
@@ -489,15 +488,13 @@ class BallModel {
         Object.assign(ball, {
             metadata: {
                 [config.appId]: ballMeta
-            }
-        });
-        await miro.board.widgets.update({
-            id: ball.id,
-            metadata: {
-                [config.appId]: ballMeta
             },
             text: (ballMeta.participatedUserIds.length - 1).toString()
         });
+        await miro.board.widgets.deleteById(ball.id);
+        const [created] = await miro.board.widgets.create(ball);
+        // @ts-ignore
+        ball.id = created.id;
     }
     static async moveToBucket(bucketType, ball, widgets) {
         const bucket = BucketModel.get(bucketType, widgets);
@@ -674,11 +671,13 @@ class POModel extends CommonUserModel {
     async checkOwnBallPosition(userId, ball, widgets) {
         const ballMeta = BallModel.getMeta(ball);
         const userCardWithBall = BallModel.userCardWithBall(ball, widgets);
-        const drawBucketMeta = BucketModel.getMeta(bucketType.draw, widgets);
-        const targetBucketMeta = BucketModel.getMeta(bucketType.target, widgets);
+        const drawBucket = BucketModel.get(bucketType.draw, widgets);
+        // const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets); //todo uncomment once meta will work
+        // const targetBucketMeta = BucketModel.getMeta(BucketType.target, widgets);
+        const targetBucket = BucketModel.get(bucketType.target, widgets); // todo uncomment once meta will work
         if (userCardWithBall && ball.lastModifiedUserId !== userId) {
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
             return;
         }
         const usersWidgets = UserModel.getAllCreatedUsers(widgets); // todo replace with enum
@@ -686,31 +685,23 @@ class POModel extends CommonUserModel {
         if (isInTargetBucket && usersWidgets.length + 1 > ballMeta.participatedUserIds.length) {
             console.log('not all peers touched balls');
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
             return;
         }
         if (isInTargetBucket && usersWidgets.length === ballMeta.participatedUserIds.length) {
             console.log('move ball to target');
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.target, widgets, targetBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.target, widgets, parseInt(targetBucket.text) + 1);
             return;
         }
         const isInSourceBucket = BucketModel.isBallInBucket(bucketType.source, ball, widgets);
-        /*    const isInDrawBucket = BucketModel.isBallInBucket(BucketType.draw, ball, widgets);
-    
-            if (!isInDrawBucket && ballMeta.bucketType === bucketType.draw) {
-              ballMeta.bucketType = BucketType.draw;
-              BallModel.destroy(ball);
-              BucketModel.updateBallsCount(BucketType.draw, widgets, drawBucketMeta.ballsCount + 1)
-              return;
-            }*/
         if (userCardWithBall) {
             const allUserBallsCount = BallModel.getUserBallsAmount(userCardWithBall, widgets);
             if (userCardWithBall &&
                 allUserBallsCount > config.rules.memberBallLimit) {
                 console.log('user reached limit in balls. Moving to draw bucket');
                 BallModel.destroy(ball);
-                BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+                BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
                 return;
             }
             ballMeta.participatedUserIds.push(userCardWithBall.metadata[config.appId].owner);
@@ -722,17 +713,18 @@ class POModel extends CommonUserModel {
         if (!userCardWithBall && !isInSourceBucket && !isInTargetBucket) {
             console.log('outside of all cards');
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
             return;
         }
     }
     async checkWrongMovedBallPosition(ball, widgets) {
         const userCardWithBall = BallModel.userCardWithBall(ball, widgets);
-        const drawBucketMeta = BucketModel.getMeta(bucketType.draw, widgets);
+        // const drawBucketMeta = BucketModel.getMeta(BucketType.draw, widgets); //todo uncomment
+        const drawBucket = BucketModel.get(bucketType.draw, widgets);
         if (!userCardWithBall || userCardWithBall.metadata[config.appId].owner !== ball.metadata[config.appId].owner) {
             console.log('out of user card!!');
             BallModel.destroy(ball);
-            BucketModel.updateBallsCount(bucketType.draw, widgets, drawBucketMeta.ballsCount + 1);
+            BucketModel.updateBallsCount(bucketType.draw, widgets, parseInt(drawBucket.text) + 1);
         }
     }
     async stopTrack() {
